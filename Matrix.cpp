@@ -104,3 +104,86 @@ void Matrix::matMatMult(Matrix &mat_right, Matrix &output)
       }
    }
 }
+
+// Jacobi method to solve linear system of equations (Ax=b)
+// Based on algorithm provided in Lecture 3 of ACSE3
+void Matrix::Jacobi(Matrix &RHS, Matrix &unknowns, double &tol, int &it_max)
+{
+   // Initialise residual, matrix for row-matrix multiplication
+   // and matrix for storing previous iteration
+   double residual;
+   Matrix new_array(unknowns.rows, unknowns.cols, true);
+   Matrix x_old(unknowns.rows, unknowns.cols, true);
+
+   // Check our dimensions match
+   if (this->cols != RHS.rows)
+   {
+      std::cerr << "Input dimensions for matrices don't match" << std::endl;
+      return;
+   }
+
+   // Check if our output matrix has had space allocated to it
+   if (unknowns.values != nullptr)
+   {
+      // Check our dimensions match
+      if (this->rows != unknowns.rows || RHS.cols != unknowns.cols)
+      {
+         std::cerr << "Input dimensions for matrices don't match" << std::endl;
+         return;
+      }
+   }
+   // The output hasn't been preallocated, so we are going to do that
+   else
+   {
+      unknowns.values = new double[this->rows * RHS.cols];
+      unknowns.preallocated = true;
+   }
+
+   // Set values to zero before hand
+   for (int i = 0; i < unknowns.size_of_values; i++)
+   {
+      unknowns.values[i] = 0;
+      x_old.values[i] = unknowns.values[i];
+   }
+
+   for (int k = 0; k < it_max; k++)
+   {
+      for (int i = 0; i < this->rows; i++)
+      {
+         double sum = 0;
+         for (int j = 0; j < this->rows; j++)
+         {
+            if (j != i)
+            {
+               sum += this->values[i * this->cols + j] * x_old.values[j];
+            }
+         }
+         unknowns.values[i] = (1.0 / this->values[i + i * this->rows]) * (RHS.values[i] - sum);
+         //(1. / A[i, i]) * (b[i] - (A [i, :i] @x[:i]) - (A [i, i + 1:] @x [i + 1:]))
+      }
+
+      // COULD JUST HAVE new_array AS VECTOR. REVISIT
+      // A x = b(estimate)
+      matMatMult(unknowns, new_array);
+
+      // Find the norm between old value and new guess
+      residual = 0;
+      for (int i = 0; i < this->rows; i++)
+      {
+         residual += pow(abs(new_array.values[i] - RHS.values[i]), 2);
+      }
+      residual = sqrt(residual);
+
+      // End iterations if tolerance convergence is reached
+      if (residual < tol)
+      {
+         break;
+      }
+
+      // Update the solution from previous iteration with new estimate
+      for (int i = 0; i < unknowns.size_of_values; i++)
+      {
+         x_old.values[i] = unknowns.values[i];
+      }
+   }
+}
