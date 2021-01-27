@@ -3,6 +3,8 @@
 #include <ctime>
 #include "Matrix.h"
 #include "Matrix.cpp"
+#include "Solver.h"
+#include "Solver.cpp"
 
 using namespace std;
 
@@ -37,11 +39,16 @@ int main()
    {
       unknowns->values[i] = 0;
    }
+
+   // testing our solver
+   auto *solver_example = new Solver<double>(dense_mat, RHS);
+
    dense_mat->printMatrix();
-   dense_mat->Jacobi(*RHS, *unknowns, tol, it_max);
+   solver_example->Jacobi(*unknowns, tol, it_max);
    unknowns->printMatrix();
 
    delete dense_mat;
    delete RHS;
    delete unknowns;
+   delete solver_example;
 }
