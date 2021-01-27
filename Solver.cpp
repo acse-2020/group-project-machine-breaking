@@ -57,7 +57,8 @@ void Solver<T>::jacobi(Matrix<T> &unknowns, double &tol, int &it_max)
         x_old.values[i] = unknowns.values[i];
     }
 
-    for (int k = 0; k < it_max; k++)
+    int k;
+    for (k = 0; k < it_max; k++)
     {
         for (int i = 0; i < this->LHS->rows; i++)
         {
@@ -81,7 +82,7 @@ void Solver<T>::jacobi(Matrix<T> &unknowns, double &tol, int &it_max)
         residual = 0;
         for (int i = 0; i < this->LHS->rows; i++)
         {
-            residual += pow(abs(new_array.values[i] - this->RHS->values[i]), 2);
+            residual += abs(pow(new_array.values[i] - this->RHS->values[i], 2));
         }
         residual = sqrt(residual);
 
@@ -97,6 +98,8 @@ void Solver<T>::jacobi(Matrix<T> &unknowns, double &tol, int &it_max)
             x_old.values[i] = unknowns.values[i];
         }
     }
+    std::cout << "Final value of k in Jacobi:" << k << std::endl;
+    std::cout << "Residual is " << residual << std::endl;
 }
 
 template <class T>
@@ -141,8 +144,8 @@ void Solver<T>::gaussSeidel(Matrix<T> &unknowns, double &tol, int &it_max)
     {
         unknowns.values[i] = 0;
     }
-
-    for (int k = 0; k < it_max; k++)
+    int k;
+    for (k = 0; k < it_max; k++)
     {
         for (int i = 0; i < this->LHS->rows; i++)
         {
@@ -161,23 +164,29 @@ void Solver<T>::gaussSeidel(Matrix<T> &unknowns, double &tol, int &it_max)
                 }
             }
             unknowns.values[i] = (1.0 / this->LHS->values[i + i * this->LHS->rows]) * (this->RHS->values[i] - sum - sum2);
+        }
+        // A x = b(estimate)
+        this->LHS->matMatMult(unknowns, new_array);
 
-            // A x = b(estimate)
-            this->LHS->matMatMult(unknowns, new_array);
+        // Find the norm between old value and new guess
+        residual = 0;
+        for (int i = 0; i < this->LHS->rows; i++)
+        {
+            residual += pow(new_array.values[i] - this->RHS->values[i], 2.0);
+        }
+        residual = sqrt(residual);
 
-            // Find the norm between old value and new guess
-            residual = 0;
-            for (int i = 0; i < this->LHS->rows; i++)
-            {
-                residual += pow(abs(new_array.values[i] - this->RHS->values[i]), 2);
-            }
-            residual = sqrt(residual);
-
-            // End iterations if tolerance convergence is reached
-            if (residual < tol)
-            {
-                break;
-            }
+        // End iterations if tolerance convergence is reached
+        if (residual < tol)
+        {
+            break;
         }
     }
+    std::cout << "k is :" << k << std::endl;
+    std::cout << "residual is :" << residual << std::endl;
+    for (int i = 0; i < this->LHS->rows; i++)
+    {
+        std::cout << "new_array value :" << new_array.values[i];
+    }
+    std::cout << std::endl;
 }

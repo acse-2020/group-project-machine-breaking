@@ -46,8 +46,15 @@ int main()
    auto *solver_example = new Solver<double>(dense_mat, RHS);
 
    dense_mat->printMatrix();
+   clock_t t = clock();
    solver_example->jacobi(*unknowns_j, tol, it_max);
+   t = clock() - t;
+   std::cout << "time: " << ((float)t) / CLOCKS_PER_SEC << std::endl;
+
+   t = clock();
    solver_example->gaussSeidel(*unknowns_gs, tol, it_max);
+   t = clock() - t;
+   std::cout << "time: " << ((float)t) / CLOCKS_PER_SEC << std::endl;
    unknowns_j->printMatrix();
    unknowns_gs->printMatrix();
 
