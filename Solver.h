@@ -17,5 +17,5 @@ public:
     // destructor
     virtual ~Solver();
 
-    void Jacobi(Matrix<T> &unknowns, double &tol, int &it_max);
+    void jacobi(Matrix<T> &unknowns, double &tol, int &it_max);
 };

@@ -17,7 +17,7 @@ Solver<T>::~Solver()
 // Jacobi method to solve linear system of equations (Ax=b)
 // Based on algorithm provided in Lecture 3 of ACSE3
 template <class T>
-void Solver<T>::Jacobi(Matrix<T> &unknowns, double &tol, int &it_max)
+void Solver<T>::jacobi(Matrix<T> &unknowns, double &tol, int &it_max)
 {
     // Initialise residual, matrix for row-matrix multiplication
     // and matrix for storing previous iteration

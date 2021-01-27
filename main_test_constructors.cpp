@@ -44,7 +44,7 @@ int main()
    auto *solver_example = new Solver<double>(dense_mat, RHS);
 
    dense_mat->printMatrix();
-   solver_example->Jacobi(*unknowns, tol, it_max);
+   solver_example->jacobi(*unknowns, tol, it_max);
    unknowns->printMatrix();
 
    delete dense_mat;
