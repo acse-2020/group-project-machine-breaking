@@ -18,4 +18,5 @@ public:
     virtual ~Solver();
 
     void jacobi(Matrix<T> &unknowns, double &tol, int &it_max);
+    void gaussSeidel(Matrix<T> &unknowns, double &tol, int &it_max);
 };
