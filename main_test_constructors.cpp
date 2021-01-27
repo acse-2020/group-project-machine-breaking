@@ -62,7 +62,7 @@ int main()
 
 
     dense_mat->printMatrix();
-    clock_t t = clock();
+    t = clock();
     solver_example->lu_solve(*unknowns_lu, tol, it_max);
     t = clock() - t;
     std::cout << "time: " << ((float)t) / CLOCKS_PER_SEC << std::endl;
