@@ -22,7 +22,8 @@ int main()
    // Testing our matrix class
    auto *dense_mat = new Matrix<double>(rows, cols, true);
    auto *RHS = new Matrix<double>(rows, 1, true);
-   auto *unknowns = new Matrix<double>(rows, 1, true);
+   auto *unknowns_j = new Matrix<double>(rows, 1, true);
+   auto *unknowns_gs = new Matrix<double>(rows, 1, true);
 
    // Now we need to go and fill our matrices
    for (int i = 0; i < rows * cols; i++)
@@ -37,18 +38,22 @@ int main()
 
    for (int i = 0; i < rows; i++)
    {
-      unknowns->values[i] = 0;
+      unknowns_j->values[i] = 0;
+      unknowns_gs->values[i] = 0;
    }
 
    // testing our solver
    auto *solver_example = new Solver<double>(dense_mat, RHS);
 
    dense_mat->printMatrix();
-   solver_example->Jacobi(*unknowns, tol, it_max);
-   unknowns->printMatrix();
+   solver_example->jacobi(*unknowns_j, tol, it_max);
+   solver_example->gaussSeidel(*unknowns_gs, tol, it_max);
+   unknowns_j->printMatrix();
+   unknowns_gs->printMatrix();
 
    delete dense_mat;
    delete RHS;
-   delete unknowns;
+   delete unknowns_j;
+   delete unknowns_gs;
    delete solver_example;
 }
