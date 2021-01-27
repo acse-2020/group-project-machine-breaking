@@ -2,6 +2,7 @@
 #include <math.h>
 #include <ctime>
 #include "Matrix.h"
+#include "Matrix.cpp"
 
 using namespace std;
 
@@ -17,9 +18,9 @@ int main()
    double init_RHS_values[] = {1., 2., 3., 4.};
 
    // Testing our matrix class
-   auto *dense_mat = new Matrix(rows, cols, true);
-   auto *RHS = new Matrix(rows, 1, true);
-   auto *unknowns = new Matrix(rows, 1, true);
+   auto *dense_mat = new Matrix<double>(rows, cols, true);
+   auto *RHS = new Matrix<double>(rows, 1, true);
+   auto *unknowns = new Matrix<double>(rows, 1, true);
 
    // Now we need to go and fill our matrices
    for (int i = 0; i < rows * cols; i++)
