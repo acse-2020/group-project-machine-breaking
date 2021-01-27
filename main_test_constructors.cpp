@@ -22,12 +22,12 @@ int main()
    auto *unknowns = new Matrix(rows, 1, true);
 
    // Now we need to go and fill our matrices
-   for (int i; i < rows * cols; i++)
+   for (int i = 0; i < rows * cols; i++)
    {
       dense_mat->values[i] = init_dense_values[i];
    }
 
-   for (int i; i < rows; i++)
+   for (int i = 0; i < rows; i++)
    {
       RHS->values[i] = init_RHS_values[i];
    }

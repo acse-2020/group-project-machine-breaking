@@ -1,2 +1,6 @@
+# Compiled object code
 a.out
 **/*.o
+
+# VS Code settings 
+.vscode/
