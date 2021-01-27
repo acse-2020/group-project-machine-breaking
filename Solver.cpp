@@ -199,8 +199,8 @@ void Solver<T>::lu_solve(Matrix<T>& unknowns, double& tol, int& it_max)
 {
     // Initialise lower and upper matrices
     int N = this->LHS->rows;
-    Matrix<T> L(this->LHS->rows, LHS->cols, true);
-    Matrix<T> A(this->LHS->rows, LHS->cols, true);
+    Matrix<T> L(N, this->LHS->cols, true);
+    Matrix<T> A(N, this->LHS->cols, true);
 
     // Check if square matrix
     if (this->LHS->cols != this->LHS->rows)
@@ -251,21 +251,21 @@ void Solver<T>::lu_solve(Matrix<T>& unknowns, double& tol, int& it_max)
         for (int i = k + 1; i < N; i++)
         {
             //s = LHS.values[i, k] / LHS.values[k, k]
-            T s = A.values[i * A.rows + k] / A.values[k * A.rows + k];
+            T s = A.values[i * A.cols + k] / A.values[k * A.cols + k];
             for (int j = k; j < N; j++)
             {
                 //A.values[i, j] = A[i, j] - s * A[k, j];
-                A.values[i * A.rows + j] = A.values[i * A.rows + j] - s * A.values[k * A.rows + j];
+                A.values[i * A.cols + j] = A.values[i * A.cols + j] - s * A.values[k * A.cols + j];
             }
             //L.values[i, k] = s;
-            L.values[i * L.rows + k] = s;
+            L.values[i * L.cols + k] = s;
         }
     }
 
     // Set L_ii = 1 (Crout's method for LU decomp)
     for (int i = 0; i < L.rows; i++)
     {
-        L.values[i * L.rows + i] += 1;
+        L.values[i * L.cols + i] += 1;
     }
 
     std::cout << "L = ";
