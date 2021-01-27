@@ -3,23 +3,28 @@
 #include <math.h>
 
 // Constructor - using an initialisation list here
-Matrix::Matrix(int rows, int cols, bool preallocate) : rows(rows), cols(cols), size_of_values(rows * cols), preallocated(preallocate)
+template <class T>
+Matrix<T>::Matrix(int rows, int cols, bool preallocate) : rows(rows), cols(cols), size_of_values(rows * cols), preallocated(preallocate)
 {
    // If we want to handle memory ourselves
    if (this->preallocated)
    {
       // Must remember to delete this in the destructor
-      this->values = new double[size_of_values];
+      this->values = new T[size_of_values];
    }
 }
 
-// Constructor - now just setting the value of our double pointer
-Matrix::Matrix(int rows, int cols, double *values_ptr) : rows(rows), cols(cols), size_of_values(rows * cols), values(values_ptr)
+// Constructor - now just setting the value of our pointer
+
+template <class T>
+Matrix<T>::Matrix(int rows, int cols, T *values_ptr) : rows(rows), cols(cols), size_of_values(rows * cols), values(values_ptr)
 {
 }
 
 // destructor
-Matrix::~Matrix()
+
+template <class T>
+Matrix<T>::~Matrix()
 {
    // Delete the values array
    if (this->preallocated)
@@ -29,7 +34,8 @@ Matrix::~Matrix()
 }
 
 // Just print out the values in our values array
-void Matrix::printValues()
+template <class T>
+void Matrix<T>::printValues()
 {
    std::cout << "Printing values" << std::endl;
    for (int i = 0; i < this->size_of_values; i++)
@@ -40,7 +46,8 @@ void Matrix::printValues()
 }
 
 // Explicitly print out the values in values array as if they are a matrix
-void Matrix::printMatrix()
+template <class T>
+void Matrix<T>::printMatrix()
 {
    std::cout << "Printing matrix" << std::endl;
    for (int j = 0; j < this->cols; j++)
@@ -56,8 +63,8 @@ void Matrix::printMatrix()
 }
 
 // Do matrix matrix multiplication
-// output = this * mat_right
-void Matrix::matMatMult(Matrix &mat_right, Matrix &output)
+template <class T> // output = this * mat_right
+void Matrix<T>::matMatMult(Matrix &mat_right, Matrix &output)
 {
 
    // Check our dimensions match
@@ -80,7 +87,7 @@ void Matrix::matMatMult(Matrix &mat_right, Matrix &output)
    // The output hasn't been preallocated, so we are going to do that
    else
    {
-      output.values = new double[this->rows * mat_right.cols];
+      output.values = new T[this->rows * mat_right.cols];
       output.preallocated = true;
    }
 
@@ -108,13 +115,14 @@ void Matrix::matMatMult(Matrix &mat_right, Matrix &output)
 
 // Jacobi method to solve linear system of equations (Ax=b)
 // Based on algorithm provided in Lecture 3 of ACSE3
-void Matrix::Jacobi(Matrix &RHS, Matrix &unknowns, double &tol, int &it_max)
+template <class T>
+void Matrix<T>::Jacobi(Matrix &RHS, Matrix &unknowns, double &tol, int &it_max)
 {
    // Initialise residual, matrix for row-matrix multiplication
    // and matrix for storing previous iteration
    double residual;
-   Matrix new_array(unknowns.rows, unknowns.cols, true);
-   Matrix x_old(unknowns.rows, unknowns.cols, true);
+   Matrix<T> new_array(unknowns.rows, unknowns.cols, true);
+   Matrix<T> x_old(unknowns.rows, unknowns.cols, true);
 
    // Check our dimensions match
    if (this->cols != RHS.rows)
@@ -136,7 +144,7 @@ void Matrix::Jacobi(Matrix &RHS, Matrix &unknowns, double &tol, int &it_max)
    // The output hasn't been preallocated, so we are going to do that
    else
    {
-      unknowns.values = new double[this->rows * RHS.cols];
+      unknowns.values = new T[this->rows * RHS.cols];
       unknowns.preallocated = true;
    }
 

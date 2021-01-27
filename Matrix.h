@@ -1,13 +1,14 @@
 #pragma once
 #include <iostream>
 
+template <class T>
 class Matrix
 {
 public:
    // constructor where we want to preallocate ourselves
    Matrix(int rows, int cols, bool preallocate);
    // constructor where we already have allocated memory outside
-   Matrix(int rows, int cols, double *values_ptr);
+   Matrix(int rows, int cols, T *values_ptr);
    // destructor
    virtual ~Matrix();
 
@@ -22,7 +23,7 @@ public:
    virtual void Jacobi(Matrix &RHS, Matrix &unknowns, double &tol, int &it_max);
 
    // Explicitly using the C++11 nullptr here
-   double *values = nullptr;
+   T *values = nullptr;
    int rows = -1;
    int cols = -1;
 
