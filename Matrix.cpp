@@ -102,13 +102,13 @@ void Matrix<T>::matMatMult(Matrix &mat_right, Matrix &output)
    // CHANGE THIS FOR LOOP ORDERING AROUND
    // AND CHECK THE TIME SPENT
    // Does the ordering matter for performance. Why??
-   for (int i = 0; i < this->cols; i++)
+   for (int i = 0; i < this->rows; i++)
    {
-      for (int k = 0; k < this->rows; k++)
+      for (int k = 0; k < this->cols; k++)
       {
-         for (int j = 0; j < mat_right.rows; j++)
+         for (int j = 0; j < mat_right.cols; j++)
          {
-            output.values[i * output.rows + j] += this->values[i * this->rows + k] * mat_right.values[k * mat_right.rows + j];
+            output.values[i * output.cols + j] += this->values[i * this->cols + k] * mat_right.values[k * mat_right.cols + j];
          }
       }
    }
