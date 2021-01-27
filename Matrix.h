@@ -20,16 +20,16 @@ public:
    virtual void matMatMult(Matrix &mat_right, Matrix &output);
 
    // Solve simple Ax=b system with Jacobi method
-   virtual void Jacobi(Matrix &RHS, Matrix &unknowns, double &tol, int &it_max);
+   //virtual void Jacobi(Matrix &RHS, Matrix &unknowns, double &tol, int &it_max);
 
    // Explicitly using the C++11 nullptr here
    T *values = nullptr;
    int rows = -1;
    int cols = -1;
 
+   int size_of_values = -1;
+   bool preallocated = false;
    // Private variables - there is no need for other classes
    // to know about these variables
 private:
-   int size_of_values = -1;
-   bool preallocated = false;
 };
