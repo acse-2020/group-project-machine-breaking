@@ -65,6 +65,7 @@ int main()
     solver_example->lu_solve(*unknowns_lu, tol, it_max);
     t = clock() - t;
     std::cout << "time: " << ((float)t) / CLOCKS_PER_SEC << std::endl;
+    unknowns_lu->printMatrix();
 
     delete dense_mat;
     delete RHS;
