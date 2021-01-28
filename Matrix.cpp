@@ -5,14 +5,14 @@
 
 // Constructor - using an initialisation list here
 template <class T>
-Matrix<T>::Matrix(int rows, int cols, bool preallocate) : rows(rows), cols(cols), size_of_values(rows* cols), preallocated(preallocate)
+Matrix<T>::Matrix(int rows, int cols, bool preallocate) : rows(rows), cols(cols), size_of_values(rows *cols), preallocated(preallocate)
 {
-   // If we want to handle memory ourselves
-   if (this->preallocated)
-   {
-      // Must remember to delete this in the destructor
-      this->values = new T[size_of_values];
-   }
+    // If we want to handle memory ourselves
+    if (this->preallocated)
+    {
+        // Must remember to delete this in the destructor
+        this->values = new T[size_of_values];
+    }
 }
 
 // Constructor - now just setting the value of our pointer
@@ -65,7 +65,7 @@ void Matrix<T>::printMatrix()
 
 // Do matrix matrix multiplication
 template <class T> // output = this * mat_right
-void Matrix<T>::matMatMult(Matrix& mat_right, Matrix& output)
+void Matrix<T>::matMatMult(Matrix &mat_right, Matrix &output)
 {
 
     // Check our dimensions match

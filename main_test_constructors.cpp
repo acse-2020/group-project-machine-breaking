@@ -20,11 +20,11 @@ int main()
     double init_RHS_values[] = { 1., 2., 3., 4. };
 
     // Testing our matrix class
-    auto* dense_mat = new Matrix<double>(rows, cols, true);
-    auto* RHS = new Matrix<double>(rows, 1, true);
-    auto* unknowns_j = new Matrix<double>(rows, 1, true);
-    auto* unknowns_gs = new Matrix<double>(rows, 1, true);
-    auto* unknowns_lu = new Matrix<double>(rows, 1, true);
+    auto *dense_mat = new Matrix<double>(rows, cols, true);
+    auto *RHS = new Matrix<double>(rows, 1, true);
+    auto *unknowns_j = new Matrix<double>(rows, 1, true);
+    auto *unknowns_gs = new Matrix<double>(rows, 1, true);
+    auto *unknowns_lu = new Matrix<double>(rows, 1, true);
 
     // Now we need to go and fill our matrices
     for (int i = 0; i < rows * cols; i++)
@@ -45,7 +45,7 @@ int main()
     }
 
     // testing our solver
-    auto* solver_example = new Solver<double>(dense_mat, RHS);
+    auto *solver_example = new Solver<double>(dense_mat, RHS);
 
     dense_mat->printMatrix();
     clock_t t = clock();
@@ -59,7 +59,6 @@ int main()
     std::cout << "time: " << ((float)t) / CLOCKS_PER_SEC << std::endl;
     unknowns_j->printMatrix();
     unknowns_gs->printMatrix();
-
 
     dense_mat->printMatrix();
     t = clock();
