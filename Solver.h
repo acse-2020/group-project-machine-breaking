@@ -1,3 +1,4 @@
+
 #pragma once
 #include <iostream>
 #include "Matrix.h"
@@ -19,4 +20,5 @@ public:
 
     void jacobi(Matrix<T> &unknowns, double &tol, int &it_max);
     void gaussSeidel(Matrix<T> &unknowns, double &tol, int &it_max);
+    void lu_solve(Matrix<T> &unknowns, double &tol, int &it_max);
 };
