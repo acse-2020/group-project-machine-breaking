@@ -3,7 +3,7 @@
 #include "Solver.h"
 
 template <class T>
-Solver<T>::Solver(Matrix<T>* LHS, Matrix<T>* RHS) : LHS(LHS), RHS(RHS)
+Solver<T>::Solver(Matrix<T> *LHS, Matrix<T> *RHS) : LHS(LHS), RHS(RHS)
 {
 }
 
@@ -17,7 +17,7 @@ Solver<T>::~Solver()
 // Jacobi method to solve linear system of equations (Ax=b)
 // Based on algorithm provided in Lecture 3 of ACSE3
 template <class T>
-void Solver<T>::jacobi(Matrix<T>& unknowns, double& tol, int& it_max)
+void Solver<T>::jacobi(Matrix<T> &unknowns, double &tol, int &it_max)
 {
     // Initialise residual, matrix for row-matrix multiplication
     // and matrix for storing previous iteration
@@ -103,7 +103,7 @@ void Solver<T>::jacobi(Matrix<T>& unknowns, double& tol, int& it_max)
 }
 
 template <class T>
-void Solver<T>::gaussSeidel(Matrix<T>& unknowns, double& tol, int& it_max)
+void Solver<T>::gaussSeidel(Matrix<T> &unknowns, double &tol, int &it_max)
 {
     // TODO: check diagonal dominance
     // TODO: add more comments
@@ -191,11 +191,10 @@ void Solver<T>::gaussSeidel(Matrix<T>& unknowns, double& tol, int& it_max)
     std::cout << std::endl;
 }
 
-
 // LU decomposition method to solve linear system of equations (Ax=b)
 // Based on algorithm provided in Lecture 3 of ACSE3
 template <class T>
-void Solver<T>::lu_solve(Matrix<T>& unknowns, double& tol, int& it_max)
+void Solver<T>::lu_solve(Matrix<T> &unknowns, double &tol, int &it_max)
 {
     // Initialise lower and upper matrices
     int N = this->LHS->rows;
@@ -273,11 +272,10 @@ void Solver<T>::lu_solve(Matrix<T>& unknowns, double& tol, int& it_max)
     {
         std::cout << L.values[i] << ", ";
     }
-    std::cout << std::endl << "U = ";
+    std::cout << std::endl
+        << "U = ";
     for (int i = 0; i < A.size_of_values; i++)
     {
         std::cout << A.values[i] << ", ";
     }
-    
 }
-
