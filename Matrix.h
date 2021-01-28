@@ -16,8 +16,9 @@ public:
    void printValues();
    virtual void printMatrix();
 
-   // Perform some operations with our matrix
-   virtual void matMatMult(Matrix &mat_right, Matrix &output);
+   /* matMatMul function should not be virtual, since in the derived class 
+   CSRMatrix we want to specify the input type as CSRMatrix */
+   void matMatMult(Matrix<T> &mat_right, Matrix<T> &output);
 
    // Solve simple Ax=b system with Jacobi method
    //virtual void Jacobi(Matrix &RHS, Matrix &unknowns, double &tol, int &it_max);
@@ -29,7 +30,4 @@ public:
 
    int size_of_values = -1;
    bool preallocated = false;
-   // Private variables - there is no need for other classes
-   // to know about these variables
-private:
 };
