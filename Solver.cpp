@@ -197,19 +197,19 @@ template <class T>
 void Solver<T>::lu_solve(Matrix<T> &unknowns, double &tol, int &it_max)
 {
     // Initialise lower and upper matrices
-    int N = this->LHS->rows;
-    Matrix<T> L(N, this->LHS->cols, true);
-    Matrix<T> A(N, this->LHS->cols, true);
+    int N = LHS->rows;
+    Matrix<T> L(N, LHS->cols, true);
+    Matrix<T> A(N, LHS->cols, true);
 
     // Check if square matrix
-    if (this->LHS->cols != this->LHS->rows)
+    if (LHS->cols != LHS->rows)
     {
         std::cerr << "Only implemented for square matrix" << std::endl;
         return;
     }
 
     // Check our dimensions match
-    if (this->LHS->cols != this->RHS->rows)
+    if (LHS->cols != RHS->rows)
     {
         std::cerr << "Input dimensions for matrices don't match" << std::endl;
         return;
@@ -219,7 +219,7 @@ void Solver<T>::lu_solve(Matrix<T> &unknowns, double &tol, int &it_max)
     if (unknowns.values != nullptr)
     {
         // Check our dimensions match
-        if (this->LHS->rows != unknowns.rows || this->RHS->cols != unknowns.cols)
+        if (LHS->rows != unknowns.rows || RHS->cols != unknowns.cols)
         {
             std::cerr << "Input dimensions for matrices don't match" << std::endl;
             return;
@@ -229,7 +229,7 @@ void Solver<T>::lu_solve(Matrix<T> &unknowns, double &tol, int &it_max)
     // The output hasn't been preallocated, so we are going to do that
     else
     {
-        unknowns.values = new T[this->LHS->rows * this->RHS->cols];
+        unknowns.values = new T[LHS->rows * RHS->cols];
         unknowns.preallocated = true;
     }
 
@@ -266,6 +266,9 @@ void Solver<T>::lu_solve(Matrix<T> &unknowns, double &tol, int &it_max)
     {
         L.values[i * L.cols + i] += 1;
     }
+
+    // Perform backward substitution
+
 
     std::cout << "L = ";
     for (int i = 0; i < L.size_of_values; i++)
