@@ -197,19 +197,21 @@ template <class T>
 void Solver<T>::lu_solve(Matrix<T> &unknowns, double &tol, int &it_max)
 {
     // Initialise lower and upper matrices
-    int N = this->LHS->rows;
-    Matrix<T> L(N, this->LHS->cols, true);
-    Matrix<T> A(N, this->LHS->cols, true);
+    int N = LHS->rows;
+    double sum;
+    Matrix<T> L(N, LHS->cols, true);
+    Matrix<T> U(N, LHS->cols, true);
+    Matrix<T> y(N, 1, true);
 
     // Check if square matrix
-    if (this->LHS->cols != this->LHS->rows)
+    if (LHS->cols != LHS->rows)
     {
         std::cerr << "Only implemented for square matrix" << std::endl;
         return;
     }
 
     // Check our dimensions match
-    if (this->LHS->cols != this->RHS->rows)
+    if (LHS->cols != RHS->rows)
     {
         std::cerr << "Input dimensions for matrices don't match" << std::endl;
         return;
@@ -219,7 +221,7 @@ void Solver<T>::lu_solve(Matrix<T> &unknowns, double &tol, int &it_max)
     if (unknowns.values != nullptr)
     {
         // Check our dimensions match
-        if (this->LHS->rows != unknowns.rows || this->RHS->cols != unknowns.cols)
+        if (LHS->rows != unknowns.rows || RHS->cols != unknowns.cols)
         {
             std::cerr << "Input dimensions for matrices don't match" << std::endl;
             return;
@@ -229,53 +231,63 @@ void Solver<T>::lu_solve(Matrix<T> &unknowns, double &tol, int &it_max)
     // The output hasn't been preallocated, so we are going to do that
     else
     {
-        unknowns.values = new T[this->LHS->rows * this->RHS->cols];
+        unknowns.values = new T[LHS->rows * RHS->cols];
         unknowns.preallocated = true;
     }
 
-    // Set values to zero before hand
-    for (int i = 0; i < unknowns.size_of_values; i++)
+    // Initialise L and U matrix.
+    // Set L_ii = 1 (Crout's method for LU decomp)
+    // Look into avoiding to copy U to save memory
+    for (int i = 0; i < LHS->size_of_values; i++)
     {
-        unknowns.values[i] = 0;
+        if (i % (L.cols + 1) == 0) 
+        {
+            L.values[i] = 1;
+        }
+        else 
+        {
+            L.values[i] = 0;
+        }
+        U.values[i] = LHS->values[i];
     }
 
-    for (int i = 0; i < this->LHS->size_of_values; i++)
-    {
-        L.values[i] = 0;
-        A.values[i] = this->LHS->values[i];
-    }
-
+    // Perform LU decomposition
     for (int k = 0; k < N - 1; k++)
     {
         for (int i = k + 1; i < N; i++)
         {
-            //s = LHS.values[i, k] / LHS.values[k, k]
-            T s = A.values[i * A.cols + k] / A.values[k * A.cols + k];
+            T s = U.values[i * U.cols + k] / U.values[k * U.cols + k];
             for (int j = k; j < N; j++)
             {
-                //A.values[i, j] = A[i, j] - s * A[k, j];
-                A.values[i * A.cols + j] = A.values[i * A.cols + j] - s * A.values[k * A.cols + j];
+                U.values[i * U.cols + j] = U.values[i * U.cols + j] - s * U.values[k * U.cols + j];
             }
-            //L.values[i, k] = s;
             L.values[i * L.cols + k] = s;
         }
     }
 
-    // Set L_ii = 1 (Crout's method for LU decomp)
-    for (int i = 0; i < L.rows; i++)
+    // Now we solve the equations L*y = b and U*x = y to find unknowns x
+    // We don't need to initialise unknowns and y as we only use values
+    // already set in the substitution, step-wise
+
+    // Perform forward substitution to solve L*y = b
+    for (int k = 0; k < N; k++)
     {
-        L.values[i * L.cols + i] += 1;
+        sum = 0;
+        for (int j = 0; j < k; j++)
+        {
+            sum += L.values[k * L.cols + j] * y.values[j];
+        }
+        y.values[k] = (RHS->values[k] - sum) / L.values[k * L.cols + k];
     }
 
-    std::cout << "L = ";
-    for (int i = 0; i < L.size_of_values; i++)
+    // Perform backward substitution to solve U*x = y
+    for (int k = N-1; k > -1; k--)
     {
-        std::cout << L.values[i] << ", ";
-    }
-    std::cout << std::endl
-        << "U = ";
-    for (int i = 0; i < A.size_of_values; i++)
-    {
-        std::cout << A.values[i] << ", ";
+        sum = 0;
+        for (int j = k + 1; j < N; j++)
+        {
+            sum += U.values[k * U.cols + j] * unknowns.values[j];
+        }
+        unknowns.values[k] = (y.values[k] - sum) / U.values[k * U.cols + k];
     }
 }
