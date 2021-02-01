@@ -54,7 +54,7 @@ void CSRMatrix<T>::printMatrix()
 }
 
 template <class T>
-void CSRMatrix<T>::matVecMult(T *input, T *output)
+void CSRMatrix<T>::matVecMult(std::vector<T> &input, std::vector<T> &output)
 {
     // TODO: check the sizes
 
