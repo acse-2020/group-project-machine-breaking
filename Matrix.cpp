@@ -5,7 +5,7 @@
 
 // Constructor - using an initialisation list here
 template <class T>
-Matrix<T>::Matrix(int rows, int cols, bool preallocate) : rows(rows), cols(cols), size_of_values(rows *cols), preallocated(preallocate)
+Matrix<T>::Matrix(int rows, int cols, bool preallocate) : rows(rows), cols(cols), size_of_values(rows * cols), preallocated(preallocate)
 {
     // If we want to handle memory ourselves
     if (this->preallocated)
@@ -18,7 +18,7 @@ Matrix<T>::Matrix(int rows, int cols, bool preallocate) : rows(rows), cols(cols)
 // Constructor - now just setting the value of our pointer
 
 template <class T>
-Matrix<T>::Matrix(int rows, int cols, T *values_ptr) : rows(rows), cols(cols), size_of_values(rows *cols), values(values_ptr)
+Matrix<T>::Matrix(int rows, int cols, T *values_ptr) : rows(rows), cols(cols), size_of_values(rows * cols), values(values_ptr)
 {
 }
 
@@ -61,6 +61,25 @@ void Matrix<T>::printMatrix()
         }
     }
     std::cout << std::endl;
+}
+
+// Do matrix vector multiplication for rowmajor
+// output =  this * vec
+template <class T>
+void Matrix<T>::matVecMult(std::vector<T> &vec, std::vector<T> &output)
+{
+    double sum1;
+
+    for (int i = 0; i < this->rows; i++)
+    {
+        // This is a dot product and can have been done with BLAS dot
+        sum1 = 0;
+        for (int j = 0; j < this->cols; j++)
+        {
+            sum1 += this->values[i * this->cols + j] * vec[j];
+        }
+        output[i] = sum1;
+    }
 }
 
 // Do matrix matrix multiplication
