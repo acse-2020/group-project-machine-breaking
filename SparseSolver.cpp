@@ -3,6 +3,7 @@
 #include "SparseSolver.h"
 #include <stdexcept>
 #include <vector>
+#include "utilities.h"
 
 template <class T>
 SparseSolver<T>::SparseSolver(CSRMatrix<T> &A, std::vector<T> &b) : A(A), b(b)
@@ -19,16 +20,6 @@ SparseSolver<T>::SparseSolver(CSRMatrix<T> &A, std::vector<T> &b) : A(A), b(b)
 template <class T>
 SparseSolver<T>::~SparseSolver()
 {
-}
-
-// TODO: move this to utilities?
-template <class T>
-void SparseSolver<T>::checkDimensions(CSRMatrix<T> &M1, std::vector<T> &vec)
-{
-    if (A.cols != vec.size())
-    {
-        throw std::invalid_argument("Dimensions don't match");
-    }
 }
 
 // TODO: move this to utilities?
