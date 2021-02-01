@@ -16,9 +16,11 @@ public:
     void printValues();
     virtual void printMatrix();
 
-   /* matMatMul function should not be virtual, since in the derived class
+    /* matMatMul function should not be virtual, since in the derived class
    CSRMatrix we want to specify the input type as CSRMatrix */
-   void matMatMult(Matrix<T> &mat_right, Matrix<T> &output);
+    void matMatMult(Matrix<T> &mat_right, Matrix<T> &output);
+
+    void matVecMult(std::vector<T> &vec, std::vector<T> &output);
 
     // Solve simple Ax=b system with Jacobi method
     //virtual void Jacobi(Matrix &RHS, Matrix &unknowns, double &tol, int &it_max);
@@ -27,7 +29,7 @@ public:
     T *values = nullptr;
     int rows = -1;
     int cols = -1;
- 
+
     int size_of_values = -1;
     bool preallocated = false;
 };

@@ -2,24 +2,27 @@
 #pragma once
 #include <iostream>
 #include "Matrix.h"
-//#include "Matrix.cpp"
+#include <vector>
 
 template <class T>
 class Solver
 {
 public:
-    Matrix<T> *A = nullptr;
-    Matrix<T> *b = nullptr;
-    int b_length = -1;
-    // constructor where we want to preallocate ourselves
-    Solver(Matrix<T> *A, Matrix<T> *b, int b_length);
-    // constructor where we already have allocated memory outside
-    //Solver(Matrix LHS, int cols, T *values_ptr);
+    Matrix<T> A;
+    std::vector<T> b{};
+
+    // constructor
+    Solver(Matrix<T> &A, std::vector<T> &b);
 
     // destructor
     virtual ~Solver();
 
-    void stationaryIterative(Matrix<T> &x, double &tol, int &it_max, bool isGaussSeidel);
+    void checkDimensions(Matrix<T> &M1, std::vector<T> &vec);
 
-    void lu_solve(Matrix<T> &x);
+    double residualCalc(std::vector<T> &x, std::vector<T> &b_estimate);
+
+    // Jacobi or Gauss-Seidel
+    void stationaryIterative(std::vector<T> &x, double &tol, int &it_max, bool isGaussSeidel);
+
+    void lu_solve(std::vector<T> &x);
 };
