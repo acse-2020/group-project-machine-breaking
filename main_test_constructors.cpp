@@ -49,12 +49,12 @@ int main()
 
     dense_mat->printMatrix();
     clock_t t = clock();
-    solver_example->jacobi(*x_j, tol, it_max);
+    solver_example->stationaryIterative(*x_j, tol, it_max, false);
     t = clock() - t;
     std::cout << "time: " << ((float)t) / CLOCKS_PER_SEC << std::endl;
 
     t = clock();
-    solver_example->gaussSeidel(*x_gs, tol, it_max);
+    solver_example->stationaryIterative(*x_gs, tol, it_max, true);
     t = clock() - t;
     std::cout << "time: " << ((float)t) / CLOCKS_PER_SEC << std::endl;
     x_j->printMatrix();
@@ -62,7 +62,7 @@ int main()
 
     dense_mat->printMatrix();
     t = clock();
-    solver_example->lu_solve(*x_lu, tol, it_max);
+    solver_example->lu_solve(*x_lu);
     t = clock() - t;
     std::cout << "time: " << ((float)t) / CLOCKS_PER_SEC << std::endl;
     x_lu->printMatrix();

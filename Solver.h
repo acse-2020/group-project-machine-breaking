@@ -18,7 +18,7 @@ public:
     // destructor
     virtual ~Solver();
 
-    void jacobi(Matrix<T> &x, double &tol, int &it_max);
-    void gaussSeidel(Matrix<T> &x, double &tol, int &it_max);
-    void lu_solve(Matrix<T> &x, double &tol, int &it_max);
+    void stationaryIterative(Matrix<T> &x, double &tol, int &it_max, bool isGaussSeidel);
+
+    void lu_solve(Matrix<T> &x);
 };

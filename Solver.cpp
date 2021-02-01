@@ -14,96 +14,8 @@ Solver<T>::~Solver()
 {
 }
 
-// Jacobi method to solve linear system of equations (Ax=b)
-// Based on algorithm provided in Lecture 3 of ACSE3
 template <class T>
-void Solver<T>::jacobi(Matrix<T> &x, double &tol, int &it_max)
-{
-    // Initialise residual, matrix for row-matrix multiplication
-    // and matrix for storing previous iteration
-    double residual;
-    Matrix<T> new_array(x.rows, x.cols, true);
-    Matrix<T> x_old(x.rows, x.cols, true);
-
-    // Check our dimensions match
-    if (this->A->cols != this->b->rows)
-    {
-        std::cerr << "Input dimensions for matrices don't match" << std::endl;
-        return;
-    }
-
-    // Check if our output matrix has had space allocated to it
-    if (x.values != nullptr)
-    {
-        // Check our dimensions match
-        if (this->A->rows != x.rows || this->b->cols != x.cols)
-        {
-            std::cerr << "Input dimensions for matrices don't match" << std::endl;
-            return;
-        }
-    }
-
-    // The output hasn't been preallocated, so we are going to do that
-    else
-    {
-        x.values = new T[this->A->rows * this->b->cols];
-        x.preallocated = true;
-    }
-
-    // Set values to zero before hand
-    for (int i = 0; i < x.size_of_values; i++)
-    {
-        x.values[i] = 0;
-        x_old.values[i] = x.values[i];
-    }
-
-    int k;
-    for (k = 0; k < it_max; k++)
-    {
-        for (int i = 0; i < this->A->rows; i++)
-        {
-            double sum = 0;
-            for (int j = 0; j < this->A->rows; j++)
-            {
-                if (j != i)
-                {
-                    sum += this->A->values[i * this->A->cols + j] * x_old.values[j];
-                }
-            }
-            x.values[i] = (1.0 / this->A->values[i + i * this->A->rows]) * (this->b->values[i] - sum);
-            //(1. / A[i, i]) * (b[i] - (A [i, :i] @x[:i]) - (A [i, i + 1:] @x [i + 1:]))
-        }
-
-        // COULD JUST HAVE new_array AS VECTOR. REVISIT
-        // A x = b(estimate)
-        this->A->matMatMult(x, new_array);
-
-        // Find the norm between old value and new guess
-        residual = 0;
-        for (int i = 0; i < this->A->rows; i++)
-        {
-            residual += abs(pow(new_array.values[i] - this->b->values[i], 2));
-        }
-        residual = sqrt(residual);
-
-        // End iterations if tolerance convergence is reached
-        if (residual < tol)
-        {
-            break;
-        }
-
-        // Update the solution from previous iteration with new estimate
-        for (int i = 0; i < x.size_of_values; i++)
-        {
-            x_old.values[i] = x.values[i];
-        }
-    }
-    std::cout << "Final value of k in Jacobi:" << k << std::endl;
-    std::cout << "Residual is " << residual << std::endl;
-}
-
-template <class T>
-void Solver<T>::gaussSeidel(Matrix<T> &x, double &tol, int &it_max)
+void Solver<T>::stationaryIterative(Matrix<T> &x, double &tol, int &it_max, bool isGaussSeidel)
 {
     // TODO: check diagonal dominance
     // TODO: add more comments
@@ -158,7 +70,7 @@ void Solver<T>::gaussSeidel(Matrix<T> &x, double &tol, int &it_max)
                 {
                     sum += this->A->values[i * this->A->cols + j] * x.values[j];
                 }
-                else if (j > i)
+                else if (j > i && isGaussSeidel)
                 {
                     sum2 += this->A->values[i * this->A->cols + j] * x.values[j];
                 }
@@ -194,7 +106,7 @@ void Solver<T>::gaussSeidel(Matrix<T> &x, double &tol, int &it_max)
 // LU decomposition method to solve linear system of equations (Ax=b)
 // Based on algorithm provided in Lecture 3 of ACSE3
 template <class T>
-void Solver<T>::lu_solve(Matrix<T> &x, double &tol, int &it_max)
+void Solver<T>::lu_solve(Matrix<T> &x)
 {
     // Initialise lower and upper matrices
     int N = A->rows;
