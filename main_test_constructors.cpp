@@ -45,7 +45,7 @@ int main()
     }
 
     // testing our solver
-    auto *solver_example = new Solver<double>(dense_mat, b);
+    auto *solver_example = new Solver<double>(dense_mat, b, rows);
 
     dense_mat->printMatrix();
     clock_t t = clock();

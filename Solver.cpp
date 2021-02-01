@@ -3,8 +3,14 @@
 #include "Solver.h"
 
 template <class T>
-Solver<T>::Solver(Matrix<T> *A, Matrix<T> *b) : A(A), b(b)
+Solver<T>::Solver(Matrix<T> *A, Matrix<T> *b, int b_length) : A(A), b(b), b_length(b_length)
 {
+    // Check our dimensions match
+    if (A->cols != b_length)
+    {
+        std::cerr << "Input dimensions for matrices don't match" << std::endl;
+        return;
+    }
 }
 
 // destructor

@@ -10,8 +10,9 @@ class Solver
 public:
     Matrix<T> *A = nullptr;
     Matrix<T> *b = nullptr;
+    int b_length = -1;
     // constructor where we want to preallocate ourselves
-    Solver(Matrix<T> *A, Matrix<T> *b);
+    Solver(Matrix<T> *A, Matrix<T> *b, int b_length);
     // constructor where we already have allocated memory outside
     //Solver(Matrix LHS, int cols, T *values_ptr);
 
