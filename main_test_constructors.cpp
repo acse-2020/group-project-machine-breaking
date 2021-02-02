@@ -58,15 +58,19 @@ int main()
     // sparse matrix solver. Result should be: {3.2, 7.8, 5.9, 7.3}
     std::cout << std::endl
               << "Sparse Matrix: " << std::endl;
-    int nnzs = 5;
-    int init_row_position[] = {0, 1, 2, 4, 5};
-    int init_col_index[] = {0, 1, 1, 2, 3};
-    double init_sparse_values[] = {2, 1, 5, 3, 7};
+    int nnzs = 4;
+    int init_row_position[] = {0, 1, 2, 3, 4};
+    int init_col_index[] = {0, 1, 2, 3};
+    double init_sparse_values[] = {2, 1, 3, 7};
     std::vector<double> b_sparse = {6.4, 7.8, 56.7, 51.1};
     std::vector<double> x_sparse(rows, 0);
+    std::vector<double> x_sparse_CG(rows, 0);
 
     auto sparse_matrix = CSRMatrix<double>(rows, cols, nnzs, &init_sparse_values[0], &init_row_position[0], &init_col_index[0]);
     auto sparse_solver = SparseSolver<double>(sparse_matrix, b_sparse);
     sparse_solver.stationaryIterative(x_sparse, tol, it_max, false);
     printVector(x_sparse);
+
+    sparse_solver.conjugateGradient(x_sparse_CG, tol, it_max);
+    printVector(x_sparse_CG);
 }
