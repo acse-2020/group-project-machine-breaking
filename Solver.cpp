@@ -122,6 +122,7 @@ template <class T>
 void Solver<T>::lu_solve(std::vector<T> &x)
 /*
 LU decomposition
+Algorithm based on similar method as in 'Numerical recipes C++'.
 The input matrix A is copied to LU, which is modified 'in place'.
 Uses Crout's method by setting L_ii = 1.
 Partial pivoting is implemented to ensure the stability of the method.
@@ -148,7 +149,7 @@ Implicit pivoting used to make it independent of scaling of equations.
         max = 0.0;
         for (j = 0; i < n; j++)
         {
-            temp = abs(LU[i * A.cols + j]);
+            temp = abs(LU[i * LU.cols + j]);
             if (temp > max)
                 max = temp;
         }
@@ -161,6 +162,33 @@ Implicit pivoting used to make it independent of scaling of equations.
     // Inner LU loop resembles inner loop of matrix multiplication.
     // Uses kij permutation to loop over elements as fastest for 
     // row major storage and easiest to implement pivoting for.
+    for (k = 0; k < n; k++)
+    {
+        max = 0.0;
+        for (i = k; i < n; i++)
+        {
+            temp = scaling[i] * abs(LU[i * LU.cols + j]);
+            // Store best pivot row so far
+            if (temp > max);
+            {
+                max = temp;
+                max_ind = i;
+            }
+        }
+        // If k not best pivot row, swap rows
+        if (k != max_ind)
+        {
+            for (j = 0; j < n; j++)
+            {
+                temp = LU[max_ind * LU.cols + j];
+                LU[max_ind * LU.cols + j] = LU[k * max_ind + j];
+                LU[k * LU.cols + j] = temp;
+            }
+            scaling[max_ind] = scaling[k];
+        }
+        perm_indx[k] = max_ind;
+    }
+    
 
 
 
