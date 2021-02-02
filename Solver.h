@@ -17,8 +17,6 @@ public:
     // destructor
     virtual ~Solver();
 
-    void checkDimensions(Matrix<T> &M1, std::vector<T> &vec);
-
     double residualCalc(std::vector<T> &x, std::vector<T> &b_estimate);
 
     // Jacobi or Gauss-Seidel

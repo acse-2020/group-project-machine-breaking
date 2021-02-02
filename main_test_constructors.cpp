@@ -4,8 +4,12 @@
 #include <vector>
 #include "Matrix.h"
 #include "Matrix.cpp"
+#include "CSRMatrix.h"
+#include "CSRMatrix.cpp"
 #include "Solver.h"
 #include "Solver.cpp"
+#include "SparseSolver.h"
+#include "SparseSolver.cpp"
 #include "utilities.h"
 
 //using namespace std;
@@ -50,4 +54,19 @@ int main()
     printVector(x_lu);
 
     delete solver_example;
+
+    // sparse matrix solver. Result should be: {3.2, 7.8, 5.9, 7.3}
+    std::cout << std::endl
+              << "Sparse Matrix: " << std::endl;
+    int nnzs = 5;
+    int init_row_position[] = {0, 1, 2, 4, 5};
+    int init_col_index[] = {0, 1, 1, 2, 3};
+    double init_sparse_values[] = {2, 1, 5, 3, 7};
+    std::vector<double> b_sparse = {6.4, 7.8, 56.7, 51.1};
+    std::vector<double> x_sparse(rows, 0);
+
+    auto sparse_matrix = CSRMatrix<double>(rows, cols, nnzs, &init_sparse_values[0], &init_row_position[0], &init_col_index[0]);
+    auto sparse_solver = SparseSolver(sparse_matrix, b_sparse);
+    sparse_solver.stationaryIterative(x_sparse, tol, it_max, false);
+    printVector(x_sparse);
 }

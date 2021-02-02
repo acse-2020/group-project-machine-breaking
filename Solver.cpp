@@ -3,6 +3,7 @@
 #include "Solver.h"
 #include <stdexcept>
 #include <vector>
+#include "utilities.h"
 
 template <class T>
 Solver<T>::Solver(Matrix<T> &A, std::vector<T> &b) : A(A), b(b)
@@ -20,15 +21,6 @@ Solver<T>::Solver(Matrix<T> &A, std::vector<T> &b) : A(A), b(b)
 template <class T>
 Solver<T>::~Solver()
 {
-}
-
-template <class T>
-void Solver<T>::checkDimensions(Matrix<T> &M1, std::vector<T> &vec)
-{
-    if (A.cols != vec.size())
-    {
-        throw std::invalid_argument("Dimensions don't match");
-    }
 }
 
 template <class T>

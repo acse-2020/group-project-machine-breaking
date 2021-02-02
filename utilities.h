@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <vector>
 // This header file includes functions that do not fall
@@ -12,4 +13,13 @@ void printVector(std::vector<T> vec)
         std::cout << vec[i] << " ";
     }
     std::cout << "\n";
+}
+
+template <typename T>
+void checkDimensions(Matrix<T> &M1, std::vector<T> &vec)
+{
+    if (M1.cols != vec.size())
+    {
+        throw std::invalid_argument("Dimensions don't match");
+    }
 }
