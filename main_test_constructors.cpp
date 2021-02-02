@@ -32,7 +32,7 @@ int main()
 
     // testing our solver
     auto *solver_example = new Solver<double>(dense_mat, b);
-
+    
     dense_mat.printMatrix();
     clock_t t = clock();
     solver_example->stationaryIterative(x_j, tol, it_max, false);
@@ -45,16 +45,18 @@ int main()
     std::cout << "time: " << ((float)t) / CLOCKS_PER_SEC << std::endl;
     printVector(x_j);
     printVector(x_gs);
-
+    
     dense_mat.printMatrix();
+    Matrix<double> LU(dense_mat.rows, dense_mat.cols, true);
     t = clock();
-    solver_example->lu_solve(x_lu);
+    auto piv = solver_example->lu_decomp(LU);
+    solver_example->lu_solve(LU, piv, x_lu);  // would be better to input b here
     t = clock() - t;
     std::cout << "time: " << ((float)t) / CLOCKS_PER_SEC << std::endl;
     printVector(x_lu);
 
     delete solver_example;
-
+    
     // sparse matrix solver. Result should be: {3.2, 7.8, 5.9, 7.3}
     std::cout << std::endl
               << "Sparse Matrix: " << std::endl;

@@ -129,19 +129,12 @@ Partial pivoting is implemented to ensure the stability of the method.
 Implicit pivoting used to make it independent of scaling of equations.
 */
 {
-    // Initialise lower and upper matrices
     int n, max_ind, i, j, k;
     n = A.rows;
     T max, temp;
 
-    // Check our dimensions match
     checkDimensions(A, b);
 
-    // Implement this later
-    // Use copy constructor to copy A, LU will be modified 'in place'
-    // Matrix<T> LU(A);
-
-    std::vector<T> y(n, 0);  // For forward substitution
     std::vector<int> perm_indx(n);  // Store index of permutation
     std::vector<T> scaling(n);  // Store implicit scaling of each row
 
@@ -157,12 +150,9 @@ Implicit pivoting used to make it independent of scaling of equations.
         max = 0.0;
         for (j = 0; j < n; j++)
         {
-
-            //temp = abs(LU.values[i * LU.cols + j]);
-            if ((temp = abs(LU.values[i * LU.cols + j])) > max)
-                max = temp; 
-            //if (temp > max)
-            //    max = temp;
+            temp = abs(LU.values[i * LU.cols + j]);
+            if (temp > max)
+                max = temp;
         }
         if (max == 0)
             throw ("Matrix is singular");
@@ -202,7 +192,9 @@ Implicit pivoting used to make it independent of scaling of equations.
         // Inner loop of LU decomposition
         for (i = k+1; i < n; i++)
         {
-            temp = LU.values[i * LU.cols + k] /= LU.values[k * LU.cols + k];  // Divide by pivot element
+            // Divide by pivot element
+            temp = LU.values[i * LU.cols + k] /= LU.values[k * LU.cols + k];
+ 
             for (j = k+1; j < n; j++)
             {
                 LU.values[i * LU.cols + j] -= temp * LU.values[k * LU.cols + j];
@@ -217,8 +209,6 @@ Implicit pivoting used to make it independent of scaling of equations.
 template <class T>
 void Solver<T>::lu_solve(Matrix<T> &LU, std::vector<int> &perm_indx,  std::vector<T> &x)
 // Solve the equations L*y = b and U*x = y to find x.
-// We don't need to initialise x and y as we only use values
-// already set in the substitution, step-wise.
 {
     int n, kp, i, j, k;
     n = LU.rows;
@@ -226,7 +216,9 @@ void Solver<T>::lu_solve(Matrix<T> &LU, std::vector<int> &perm_indx,  std::vecto
 
     checkDimensions(A, x);
 
-    // 
+    // The unknown x will be used as temporary storage for y.
+    // The equations for forward and backward substitution have
+    // been simplified by combining (b and sum) and (y and sum).
     for (i = 0; i < n; i++)
     {
         x[i] = b[i];
@@ -237,28 +229,24 @@ void Solver<T>::lu_solve(Matrix<T> &LU, std::vector<int> &perm_indx,  std::vecto
     for (k = 0; k < n; k++)
     {
         kp = perm_indx[k];
-        //b[ip] = b[k];
         sum = x[kp];
         x[kp] = x[k];
         for (j = 0; j < k; j++)
         {
-            //sum += LU.values[k * LU.cols + j] * y[j];
             sum -= LU.values[k * LU.cols + j] * x[j];
         }
         x[k] = sum;
-        //y[k] = (b[k] - sum) / LU.values[k * LU.cols + k];
     }
 
     // Perform backward substitution to solve U*x = y
+    // Here x = y before being updated.
     for (k = n-1; k >= 0; k--)
     {
         sum = x[k];
         for (j = k + 1; j < n; j++)
         {
-            //sum += LU.values[k * LU.cols + j] * x[j];
             sum -= LU.values[k * LU.cols + j] * x[j];
         }
-        // x[k] = (y[k] - sum) / LU.values[k * LU.cols + k];
         x[k] = sum / LU.values[k * LU.cols + k];
     }
 }
