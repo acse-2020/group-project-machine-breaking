@@ -117,82 +117,136 @@ void Solver<T>::stationaryIterative(std::vector<T> &x, double &tol, int &it_max,
     std::cout << "residual is :" << residual << std::endl;
 }
 
-// LU decomposition method to solve linear system of equations (Ax=b)
-// Based on algorithm provided in Lecture 3 of ACSE3
+// LU decomposition
 template <class T>
-void Solver<T>::lu_solve(std::vector<T> &x)
+std::vector<int> Solver<T>::lu_decomp(Matrix<T> &LU)
+/*
+LU decomposition
+Algorithm based on similar method as in 'Numerical recipes C++'.
+The input matrix A is copied to LU, which is modified 'in place'.
+Uses Crout's method by setting L_ii = 1.
+Partial pivoting is implemented to ensure the stability of the method.
+Implicit pivoting used to make it independent of scaling of equations.
+*/
 {
-    // Initialise lower and upper matrices
-    int N = A.rows;
-    double sum;
-    Matrix<T> L(N, A.cols, true);
-    Matrix<T> U(N, A.cols, true);
-    std::vector<T> y(N, 0);
+    int n, max_ind, i, j, k;
+    n = A.rows;
+    T max, temp;
 
-    // Check if square matrix
-    if (A.cols != A.rows)
-    {
-        std::cerr << "Only implemented for square matrix" << std::endl;
-        return;
-    }
-
-    // Check our dimensions match
     checkDimensions(A, b);
-    checkDimensions(A, x);
 
-    // Initialise L and U matrix.
-    // Set L_ii = 1 (Crout's method for LU decomp)
-    // Look into avoiding to copy U to save memory
+    std::vector<int> perm_indx(n);  // Store index of permutation
+    std::vector<T> scaling(n);  // Store implicit scaling of each row
+
+    // Copy values into LU, want to do this with a copy constryctor later
     for (int i = 0; i < A.size_of_values; i++)
     {
-        if (i % (L.cols + 1) == 0)
+        LU.values[i] = A.values[i];
+    }
+
+    // Implicit scaling, find max in each row and store scaling factor
+    for (i = 0; i < n; i++)
+    {
+        max = 0.0;
+        for (j = 0; j < n; j++)
         {
-            L.values[i] = 1;
+            temp = abs(LU.values[i * LU.cols + j]);
+            if (temp > max)
+                max = temp;
         }
-        else
-        {
-            L.values[i] = 0;
-        }
-        U.values[i] = A.values[i];
+        if (max == 0)
+            throw ("Matrix is singular");
+        scaling[i] = 1.0/max;
     }
 
     // Perform LU decomposition
-    for (int k = 0; k < N - 1; k++)
+    // Inner LU loop resembles inner loop of matrix multiplication.
+    // Uses kij permutation to loop over elements as fastest for 
+    // row major storage and easiest to implement pivoting for.
+    for (k = 0; k < n; k++)
     {
-        for (int i = k + 1; i < N; i++)
+        max = 0.0;
+        for (i = k; i < n; i++)
         {
-            T s = U.values[i * U.cols + k] / U.values[k * U.cols + k];
-            for (int j = k; j < N; j++)
+            temp = scaling[i] * abs(LU.values[i * LU.cols + k]);
+            // Store best pivot row so far
+            if (temp > max);
             {
-                U.values[i * U.cols + j] = U.values[i * U.cols + j] - s * U.values[k * U.cols + j];
+                max = temp;
+                max_ind = i;
             }
-            L.values[i * L.cols + k] = s;
+        }
+        // If k not best pivot row, swap rows
+        if (k != max_ind)
+        {
+            for (j = 0; j < n; j++)
+            {
+                temp = LU.values[max_ind * LU.cols + j];
+                LU.values[max_ind * LU.cols + j] = LU.values[k * LU.cols + j];
+                LU.values[k * LU.cols + j] = temp;
+            }
+            scaling[max_ind] = scaling[k];
+        }
+        perm_indx[k] = max_ind;
+        
+        // Inner loop of LU decomposition
+        for (i = k+1; i < n; i++)
+        {
+            // Divide by pivot element
+            temp = LU.values[i * LU.cols + k] /= LU.values[k * LU.cols + k];
+ 
+            for (j = k+1; j < n; j++)
+            {
+                LU.values[i * LU.cols + j] -= temp * LU.values[k * LU.cols + j];
+            }
         }
     }
+    return perm_indx;
+}
 
-    // Now we solve the equations L*y = b and U*x = y to find x x
-    // We don't need to initialise x and y as we only use values
-    // already set in the substitution, step-wise
 
-    // Perform forward substitution to solve L*y = b
-    for (int k = 0; k < N; k++)
+// Linear solver that uses LU decomposition 
+template <class T>
+void Solver<T>::lu_solve(Matrix<T> &LU, std::vector<int> &perm_indx,  std::vector<T> &x)
+// Solve the equations L*y = b and U*x = y to find x.
+{
+    int n, kp, i, j, k;
+    n = LU.rows;
+    T sum;
+
+    checkDimensions(A, x);
+
+    // The unknown x will be used as temporary storage for y.
+    // The equations for forward and backward substitution have
+    // been simplified by combining (b and sum) and (y and sum).
+    for (i = 0; i < n; i++)
     {
-        sum = 0;
-        for (int j = 0; j < k; j++)
+        x[i] = b[i];
+    }
+
+    // Perform forward substitution to solve L*y = b.
+    // Need to keep track of permutation of RHS as well
+    for (k = 0; k < n; k++)
+    {
+        kp = perm_indx[k];
+        sum = x[kp];
+        x[kp] = x[k];
+        for (j = 0; j < k; j++)
         {
-            sum += L.values[k * L.cols + j] * y[j];
+            sum -= LU.values[k * LU.cols + j] * x[j];
         }
-        y[k] = (b[k] - sum) / L.values[k * L.cols + k];
+        x[k] = sum;
     }
 
     // Perform backward substitution to solve U*x = y
-    for (int k = N - 1; k > -1; k--)
+    // Here x = y before being updated.
+    for (k = n-1; k >= 0; k--)
     {
-        sum = 0;
-        for (int j = k + 1; j < N; j++)
+        sum = x[k];
+        for (j = k + 1; j < n; j++)
         {
-            sum += U.values[k * U.cols + j] * x[j];
+            sum -= LU.values[k * LU.cols + j] * x[j];
         }
-        x[k] = (y[k] - sum) / U.values[k * U.cols + k];
+        x[k] = sum / LU.values[k * LU.cols + k];
     }
 }

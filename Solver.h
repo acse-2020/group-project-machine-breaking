@@ -22,5 +22,6 @@ public:
     // Jacobi or Gauss-Seidel
     void stationaryIterative(std::vector<T> &x, double &tol, int &it_max, bool isGaussSeidel);
 
-    void lu_solve(std::vector<T> &x);
+    std::vector<int> lu_decomp(Matrix<T> &LU);
+    void lu_solve(Matrix<T> &LU, std::vector<int> &piv, std::vector<T> &x);
 };

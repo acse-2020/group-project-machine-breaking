@@ -18,6 +18,13 @@ void printVector(std::vector<T> vec)
 template <typename T>
 void checkDimensions(Matrix<T> &M1, std::vector<T> &vec)
 {
+
+    // Check if square matrix
+    if (M1.cols != M1.rows)
+    {
+        throw std::invalid_argument("Only implemented for square matrix");
+    }
+
     if (M1.cols != vec.size())
     {
         throw std::invalid_argument("Dimensions don't match");
