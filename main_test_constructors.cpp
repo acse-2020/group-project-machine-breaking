@@ -66,7 +66,7 @@ int main()
     std::vector<double> x_sparse(rows, 0);
 
     auto sparse_matrix = CSRMatrix<double>(rows, cols, nnzs, &init_sparse_values[0], &init_row_position[0], &init_col_index[0]);
-    auto sparse_solver = SparseSolver(sparse_matrix, b_sparse);
+    auto sparse_solver = SparseSolver<double>(sparse_matrix, b_sparse);
     sparse_solver.stationaryIterative(x_sparse, tol, it_max, false);
     printVector(x_sparse);
 }
