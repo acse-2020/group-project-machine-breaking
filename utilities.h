@@ -23,3 +23,17 @@ void checkDimensions(Matrix<T> &M1, std::vector<T> &vec)
         throw std::invalid_argument("Dimensions don't match");
     }
 }
+
+template <typename T>
+double vecDotProduct(std::vector<T> v1, std::vector<T> v2)
+{
+    double result = 0;
+    if (v1.size() == v2.size())
+    {
+        for (int i = 0; i < v1.size(); i++)
+        {
+            result += v1[i] * v2[i];
+        }
+    }
+    return result;
+}

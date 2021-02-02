@@ -118,3 +118,75 @@ void SparseSolver<T>::stationaryIterative(std::vector<T> &x, double &tol, int &i
     std::cout << "k is :" << k << std::endl;
     std::cout << "residual is :" << residual << std::endl;
 }
+
+template <class T>
+void SparseSolver<T>::conjugateGradient(std::vector<T> &x, double &tol, int &it_max)
+{
+    // TODO: check diagonal dominance
+    // TODO: add more comments
+    double residual;
+    double alpha;
+    double beta;
+    std::vector<T> b_estimate(x.size(), 0);
+    std::vector<T> residue_vec(x.size(), 0);
+    std::vector<T> p(x.size(), 0);
+    std::vector<T> Ap_product(x.size(), 0);
+    std::vector<T> r_old(x.size(), 0);
+
+    // Check our dimensions match
+    checkDimensions(A, b);
+    checkDimensions(A, x);
+
+    // Set values to zero before hand
+    for (int i = 0; i < x.size(); i++)
+    {
+        x[i] = 0;
+    }
+
+    // Calculate estimate of b
+    // A.matVecMult(x, b_estimate);
+
+    // Find the norm between old value and new guess
+    for (int i = 0; i < x.size(); i++)
+    {
+        r_old[i] = b[i];
+        p[i] = r_old[i];
+    }
+
+    int k;
+    for (k = 0; k < it_max; k++)
+    {
+        A.matVecMult(p, Ap_product);
+
+        // Calculate alpha gradient
+        alpha = vecDotProduct(r_old, r_old) / vecDotProduct(p, Ap_product);
+
+        residual = 0.0;
+        for (int i = 0; i < x.size(); i++)
+        {
+            x[i] += alpha * p[i];
+            residue_vec[i] = r_old[i] - alpha * Ap_product[i];
+            residual += pow(residue_vec[i], 2.0);
+        }
+
+        residual = sqrt(residual);
+
+        if (residual < tol)
+        {
+            break;
+        }
+
+        // Calculate beta gradient
+        beta = vecDotProduct(residue_vec, residue_vec) / vecDotProduct(r_old, r_old);
+        for (int i = 0; i < x.size(); i++)
+        {
+            p[i] = residue_vec[i] + beta * p[i];
+
+            // Update "old"(k) residue vector with new residue (k+1)
+            // for next iteration
+            r_old[i] = residue_vec[i];
+        }
+    }
+    std::cout << "k is :" << k << std::endl;
+    std::cout << "residual is :" << residual << std::endl;
+}
