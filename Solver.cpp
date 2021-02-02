@@ -125,38 +125,24 @@ void Solver<T>::lu_solve(std::vector<T> &x)
     // Initialise lower and upper matrices
     int N = A.rows;
     double sum;
-    Matrix<T> L(N, A.cols, true);
-    Matrix<T> U(N, A.cols, true);
-    std::vector<T> y(N, 0);
-
-    // Check if square matrix
-    if (A.cols != A.rows)
-    {
-        std::cerr << "Only implemented for square matrix" << std::endl;
-        return;
-    }
-
+    // Use copy constructor to copy A, LU will be modified 'in place'
+    Matrix<T> LU(A);
+    std::vector<T> y(N, 0);  // For forward substitution
+    
     // Check our dimensions match
     checkDimensions(A, b);
     checkDimensions(A, x);
 
-    // Initialise L and U matrix.
-    // Set L_ii = 1 (Crout's method for LU decomp)
-    // Look into avoiding to copy U to save memory
-    for (int i = 0; i < A.size_of_values; i++)
-    {
-        if (i % (L.cols + 1) == 0)
-        {
-            L.values[i] = 1;
-        }
-        else
-        {
-            L.values[i] = 0;
-        }
-        U.values[i] = A.values[i];
-    }
-
     // Perform LU decomposition
+    // Inner LU loop resembles inner loop of matrix multiplication.
+    // Uses kij permutation to loop over elements as fastest for 
+    // row major storage and easiest to implement pivoting for.
+    // Set L_ii = 1 (Crout's method for LU decomp)
+
+
+
+
+    /*
     for (int k = 0; k < N - 1; k++)
     {
         for (int i = k + 1; i < N; i++)
@@ -169,6 +155,7 @@ void Solver<T>::lu_solve(std::vector<T> &x)
             L.values[i * L.cols + k] = s;
         }
     }
+    */
 
     // Now we solve the equations L*y = b and U*x = y to find x x
     // We don't need to initialise x and y as we only use values
