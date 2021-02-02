@@ -118,26 +118,49 @@ void Solver<T>::stationaryIterative(std::vector<T> &x, double &tol, int &it_max,
 }
 
 // LU decomposition method to solve linear system of equations (Ax=b)
-// Based on algorithm provided in Lecture 3 of ACSE3
 template <class T>
 void Solver<T>::lu_solve(std::vector<T> &x)
+/*
+LU decomposition
+The input matrix A is copied to LU, which is modified 'in place'.
+Uses Crout's method by setting L_ii = 1.
+Partial pivoting is implemented to ensure the stability of the method.
+Implicit pivoting used to make it independent of scaling of equations.
+*/
 {
     // Initialise lower and upper matrices
-    int N = A.rows;
-    double sum;
+    int n, max_ind, i, j, k;
+    n = A.rows;
+    double max, temp;
     // Use copy constructor to copy A, LU will be modified 'in place'
     Matrix<T> LU(A);
     std::vector<T> y(N, 0);  // For forward substitution
+    std::vector<T> perm_indx;  // Store index of permutation
+    std::vector<T> scaling(N);  // Store implicit scaling of each row
     
     // Check our dimensions match
     checkDimensions(A, b);
     checkDimensions(A, x);
 
+    // Implicit scaling, find max in each row and store scaling factor
+    for (i = 0; i < n; i++)
+    {
+        max = 0.0;
+        for (j = 0; i < n; j++)
+        {
+            temp = abs(LU[i * A.cols + j]);
+            if (temp > max)
+                max = temp;
+        }
+        if (max == 0)
+            throw ("Matrix is singular");
+        scaling[i] = 1.0/max;
+    }
+
     // Perform LU decomposition
     // Inner LU loop resembles inner loop of matrix multiplication.
     // Uses kij permutation to loop over elements as fastest for 
     // row major storage and easiest to implement pivoting for.
-    // Set L_ii = 1 (Crout's method for LU decomp)
 
 
 
