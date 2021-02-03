@@ -20,4 +20,7 @@ public:
     double residualCalc(std::vector<T> &x, std::vector<T> &b_estimate);
 
     void conjugateGradient(std::vector<T> &x, double &tol, int &it_max);
+
+    std::vector<int> lu_decomp(CSRMatrix<T> &LU);
+    void lu_solve(CSRMatrix<T> &LU, std::vector<int> &piv, std::vector<T> &x);
 };
