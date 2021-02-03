@@ -199,12 +199,12 @@ std::vector<int> SparseSolver<T>::lu_decomp(CSRMatrix<T> &LU)
 LU decomposition
 Algorithm based on similar method as in 'Numerical recipes C++'.
 The input matrix A is copied to LU, which is modified 'in place'.
-Uses Crout's method by setting L_ii = 1.
+Uses Crout's method by setting U_ii = 1.
 Partial pivoting is implemented to ensure the stability of the method.
 Implicit pivoting used to make it independent of scaling of equations.
 */
 {
-    int n, max_ind, i, j, k;
+    int n, max_ind, i, j, k, row_start, row_end, nrow_vals;
     n = A.rows;
     T max, temp;
 
@@ -214,26 +214,35 @@ Implicit pivoting used to make it independent of scaling of equations.
     std::vector<T> scaling(n);     // Store implicit scaling of each row
 
     // Copy values into LU, want to do this with a copy constryctor later
-    for (int i = 0; i < A.size_of_values; i++)
+    for (int i = 0; i < A.nnzs; i++)
     {
         LU.values[i] = A.values[i];
+        std::cout << " i " << i << " LU val " << LU.values[i] << std::endl;
+        LU.col_index[i] = A.col_index[i];
     }
-
+        for (int i = 0; i < A.rows + 1; i++)
+    {
+        LU.row_position[i] = A.row_position[i];
+    }
+    LU.print2DMatrix();
     // Implicit scaling, find max in each row and store scaling factor
     for (i = 0; i < n; i++)
     {
         max = 0.0;
-        for (j = 0; j < n; j++)
+        row_start = LU.row_position[i];
+        row_end = LU.row_position[i + 1];
+        for (j = row_start; j < row_end; j++)
         {
-            temp = abs(LU.values[i * LU.cols + j]);
+            temp = abs(LU.values[j]);
             if (temp > max)
                 max = temp;
         }
         if (max == 0)
-            throw("Matrix is singular");
+            throw std::invalid_argument("Matrix is singular");
         scaling[i] = 1.0 / max;
     }
-
+    printVector(scaling);
+    
     // Perform LU decomposition
     // Inner LU loop resembles inner loop of matrix multiplication.
     // Uses kij permutation to loop over elements as fastest for
@@ -241,6 +250,8 @@ Implicit pivoting used to make it independent of scaling of equations.
     for (k = 0; k < n; k++)
     {
         max = 0.0;
+        row_start = LU.row_position[i];
+        row_end = LU.row_position[i + 1];
         for (i = k; i < n; i++)
         {
             temp = scaling[i] * abs(LU.values[i * LU.cols + k]);
@@ -277,6 +288,7 @@ Implicit pivoting used to make it independent of scaling of equations.
         }
     }
     return perm_indx;
+
 }
 
 // Linear solver that uses LU decomposition
