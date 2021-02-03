@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm>
 #include "CSRMatrix.h"
 
 template <class T>
