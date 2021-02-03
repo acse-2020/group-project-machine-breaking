@@ -15,7 +15,7 @@ public:
     void matVecMult(std::vector<T> &input, std::vector<T> &output);
 
     // TODO: implement sparse matMatMult
-    // void matMatMult(CSRMatrix<T> &mat_right, CSRMatrix<T> &output);
+    CSRMatrix<T> matMatMult(CSRMatrix<T> &mat_right);
 
     int *row_position = nullptr;
     int *col_index = nullptr;
