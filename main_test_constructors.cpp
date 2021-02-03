@@ -32,6 +32,7 @@ void test_matmatmult_4x4()
 
     CSRMatrix<double> result = sparse_matrix1.matMatMult(sparse_matrix2);
     result.printMatrix();
+    result.print2DMatrix();
 }
 
 void test_matmatmult_5x5()
@@ -47,6 +48,7 @@ void test_matmatmult_5x5()
 
     CSRMatrix<double> result = sparse_matrix.matMatMult(sparse_matrix);
     result.printMatrix();
+    result.print2DMatrix();
 }
 
 int main()

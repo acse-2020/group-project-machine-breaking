@@ -12,6 +12,8 @@ public:
 
     virtual void printMatrix();
 
+    virtual void print2DMatrix();
+
     void matVecMult(std::vector<T> &input, std::vector<T> &output);
 
     // TODO: implement sparse matMatMult
