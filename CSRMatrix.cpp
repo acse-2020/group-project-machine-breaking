@@ -7,8 +7,9 @@ CSRMatrix<T>::CSRMatrix(int rows, int cols, int nnzs, bool preallocate) : Matrix
     this->preallocated = preallocate;
     if (this->preallocated)
     {
+        // Values and col index should be same length, while rows should be no.rows + 1
         this->values = new T[this->nnzs];
-        this->row_position = new int[this->nnzs + 1];
+        this->row_position = new int[this->rows + 1];
         this->col_index = new int[this->nnzs];
     }
 }
