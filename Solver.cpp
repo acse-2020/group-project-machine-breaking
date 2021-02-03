@@ -135,8 +135,8 @@ Implicit pivoting used to make it independent of scaling of equations.
 
     checkDimensions(A, b);
 
-    std::vector<int> perm_indx(n);  // Store index of permutation
-    std::vector<T> scaling(n);  // Store implicit scaling of each row
+    std::vector<int> perm_indx(n); // Store index of permutation
+    std::vector<T> scaling(n);     // Store implicit scaling of each row
 
     // Copy values into LU, want to do this with a copy constryctor later
     for (int i = 0; i < A.size_of_values; i++)
@@ -155,13 +155,13 @@ Implicit pivoting used to make it independent of scaling of equations.
                 max = temp;
         }
         if (max == 0)
-            throw ("Matrix is singular");
-        scaling[i] = 1.0/max;
+            throw("Matrix is singular");
+        scaling[i] = 1.0 / max;
     }
 
     // Perform LU decomposition
     // Inner LU loop resembles inner loop of matrix multiplication.
-    // Uses kij permutation to loop over elements as fastest for 
+    // Uses kij permutation to loop over elements as fastest for
     // row major storage and easiest to implement pivoting for.
     for (k = 0; k < n; k++)
     {
@@ -170,7 +170,7 @@ Implicit pivoting used to make it independent of scaling of equations.
         {
             temp = scaling[i] * abs(LU.values[i * LU.cols + k]);
             // Store best pivot row so far
-            if (temp > max);
+            if (temp > max)
             {
                 max = temp;
                 max_ind = i;
@@ -188,14 +188,14 @@ Implicit pivoting used to make it independent of scaling of equations.
             scaling[max_ind] = scaling[k];
         }
         perm_indx[k] = max_ind;
-        
+
         // Inner loop of LU decomposition
-        for (i = k+1; i < n; i++)
+        for (i = k + 1; i < n; i++)
         {
             // Divide by pivot element
             temp = LU.values[i * LU.cols + k] /= LU.values[k * LU.cols + k];
- 
-            for (j = k+1; j < n; j++)
+
+            for (j = k + 1; j < n; j++)
             {
                 LU.values[i * LU.cols + j] -= temp * LU.values[k * LU.cols + j];
             }
@@ -204,10 +204,9 @@ Implicit pivoting used to make it independent of scaling of equations.
     return perm_indx;
 }
 
-
-// Linear solver that uses LU decomposition 
+// Linear solver that uses LU decomposition
 template <class T>
-void Solver<T>::lu_solve(Matrix<T> &LU, std::vector<int> &perm_indx,  std::vector<T> &x)
+void Solver<T>::lu_solve(Matrix<T> &LU, std::vector<int> &perm_indx, std::vector<T> &x)
 // Solve the equations L*y = b and U*x = y to find x.
 {
     int n, kp, i, j, k;
@@ -240,7 +239,7 @@ void Solver<T>::lu_solve(Matrix<T> &LU, std::vector<int> &perm_indx,  std::vecto
 
     // Perform backward substitution to solve U*x = y
     // Here x = y before being updated.
-    for (k = n-1; k >= 0; k--)
+    for (k = n - 1; k >= 0; k--)
     {
         sum = x[k];
         for (j = k + 1; j < n; j++)
