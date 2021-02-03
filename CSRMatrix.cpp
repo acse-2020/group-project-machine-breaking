@@ -55,6 +55,34 @@ void CSRMatrix<T>::printMatrix()
 }
 
 template <class T>
+void CSRMatrix<T>::print2DMatrix()
+{
+    // Initialise dense matrix format
+    std::vector<T> vals(this->rows * this->cols, 0);
+    std::cout << "Printing 2D Matrix" << std::endl;
+    for (int i = 0; i < this->rows; i++)
+    {
+        // rows indices of matrix
+        int r_start = row_position[i];
+        int r_end = row_position[i + 1];
+
+        // cii - index of col_index of array
+        for (int cii = r_start; cii < r_end; cii++)
+        {
+            int ci = col_index[cii];
+            // Store non-zeros in row-major order
+            vals[ci + i * this->cols] = this->values[cii];
+        }
+        for (int j = 0; j < this->cols; j++)
+        {
+            std::cout << " " << vals[j + i * this->cols] << " ";
+        }
+
+        std::cout << std::endl;
+    }
+}
+
+template <class T>
 void CSRMatrix<T>::matVecMult(std::vector<T> &input, std::vector<T> &output)
 {
     // TODO: check the sizes
