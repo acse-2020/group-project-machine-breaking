@@ -214,7 +214,7 @@ Implicit pivoting used to make it independent of scaling of equations.
     std::vector<T> scaling(n);     // Store implicit scaling of each row
 
     // Copy values into LU, want to do this with a copy constryctor later
-    for (int i = 0; i < A.nnzs; i++)
+    for (int i = 0; i <= A.nnzs; i++)
     {
         LU.values[i] = A.values[i];
         std::cout << " i " << i << " LU val " << LU.values[i] << std::endl;
@@ -254,7 +254,7 @@ Implicit pivoting used to make it independent of scaling of equations.
     // Perform the inner loop of LU decomp, reduce remaining submatrix
 
 
-
+    /*
     for (k = 0; k < n; k++)
     {
         max = 0.0;
@@ -292,7 +292,7 @@ Implicit pivoting used to make it independent of scaling of equations.
                 LU.values[i * LU.cols + j] -= temp * LU.values[k * LU.cols + j];
             }
         }
-    }
+    }*/
     return perm_indx;
 
 }
@@ -302,7 +302,7 @@ template <class T>
 void SparseSolver<T>::lu_solve(CSRMatrix<T> &LU, std::vector<int> &perm_indx, std::vector<T> &x)
 // Solve the equations L*y = b and U*x = y to find x.
 {
-    int n, ip, i, j, row_start, row_len;
+    int n, ip, i, j, row_start, row_len, col_start, col_indx;
     n = LU.rows;
     T sum;
 
@@ -326,25 +326,15 @@ void SparseSolver<T>::lu_solve(CSRMatrix<T> &LU, std::vector<int> &perm_indx, st
         row_len = LU.row_position[i + 1] - row_start;
         for (j = 0; j < row_len; j++)
         {
-            if (LU.col_index[row_start + j] < i)
-                sum -= LU.values[row_start + j] * x[j];
+            col_indx = LU.col_index[row_start + j];
+            // check if valid and exits loop to avoid uneccesary checks
+            if (col_indx >= i)
+                break;
+            sum -= LU.values[row_start + j] * x[col_indx];
         }
         x[i] = sum;
     } 
-
-    /*
-    for (i = 0; i < n; i++)
-    {
-        ip = perm_indx[i];
-        sum = x[ip];
-        x[ip] = x[i];
-        for (j = 0; j < i; j++)
-        {
-            sum -= LU.values[i * LU.cols + j] * x[j];
-        }
-        x[i] = sum;
-    }
-    */
+    
     // Perform backward substitution to solve U*x = y
     // Here x = y before being updated.
     for (i = n - 1; i >= 0; i--)
