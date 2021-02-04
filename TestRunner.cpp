@@ -1,5 +1,6 @@
 #include "TestRunner.h"
 #include <iostream>
+#include <string>
 
 #define RED "\033[31m"
 #define GREEN "\033[32m"
@@ -68,6 +69,11 @@ bool TestRunner::assertArrays(double *arr1, double *arr2, int length)
         }
     }
     return true;
+}
+
+void TestRunner::testError(std::string message)
+{
+    std::cerr << RED << message << RESET << std::endl;
 }
 
 bool TestRunner::assertArrays(int *arr1, int *arr2, int length)

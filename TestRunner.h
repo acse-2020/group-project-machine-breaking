@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <string>
 
 class TestRunner
 {
@@ -16,4 +17,5 @@ public:
 
     static bool assertArrays(int *arr1, int *arr2, int length);
     static bool assertArrays(double *arr1, double *arr2, int length);
+    static void testError(std::string message);
 };
