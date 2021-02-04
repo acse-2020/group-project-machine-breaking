@@ -202,16 +202,19 @@ The input matrix A is copied to LU, which is modified 'in place'.
 Uses Crout's method by setting U_ii = 1.
 Partial pivoting is implemented to ensure the stability of the method.
 Implicit pivoting used to make it independent of scaling of equations.
+An extensions would be to create a pivoting scheme that minimised the 
+number of non-zero elements.
 */
 {
-    int n, max_ind, i, j, k, row_start, row_len, nrow_vals;
+    int n, max_ind, i, j, k, row_start, row_len;
     n = A.rows;
-    T max, temp;
+    T max, temp, piv_el;
 
     checkDimensions(A, b);
 
     std::vector<int> perm_indx(n); // Store index of permutation
     std::vector<T> scaling(n);     // Store implicit scaling of each row
+    std::vector<T> pivot_elemets(n);     // Store implicit scaling of each row
 
     // Copy values into LU, want to do this with a copy constryctor later
     for (int i = 0; i <= A.nnzs; i++)
@@ -226,6 +229,7 @@ Implicit pivoting used to make it independent of scaling of equations.
     }
     LU.print2DMatrix();
     // Implicit scaling, find max in each row and store scaling factor
+    // This part is working
     for (i = 0; i < n; i++)
     {
         max = 0.0;
@@ -248,19 +252,18 @@ Implicit pivoting used to make it independent of scaling of equations.
     // Uses kij permutation to loop over elements as fastest for
     // row major storage and easiest to implement pivoting for.
 
-
     // Loop over Upper matrix to find largest B to pivot with
     // Pivot by swapping row k by row with max pivot element
     // Perform the inner loop of LU decomp, reduce remaining submatrix
-
-
-    /*
+    
     for (k = 0; k < n; k++)
     {
+        // The search of finding the max element and performing the row swapping is not implemented yet
+        /*
         max = 0.0;
         for (i = k; i < n; i++)
         {
-            temp = scaling[i] * abs(LU.values[LU.row_position[i] + k]);
+            temp = scaling[i] *  abs(LU.values[i * LU.cols + k]);
             // Store best pivot row so far
             if (temp > max)
             {
@@ -280,21 +283,61 @@ Implicit pivoting used to make it independent of scaling of equations.
             scaling[max_ind] = scaling[k];
         }
         perm_indx[k] = max_ind;
+        */
+
+       // Find and store pivot element
+        row_start = LU.row_position[k];
+        row_len = LU.row_position[k + 1] - row_start;
+        for (j = 0; j < row_len; j++)
+            {
+                col_indx = LU.col_index[row_start + j];
+                if (col_indx == k) 
+                {
+                    piv_elements[k] = LU.values[row_start+ j];
+                    break;
+                }
+            }
 
         // Inner loop of LU decomposition
         for (i = k + 1; i < n; i++)
         {
+            row_start = LU.row_position[i];
+            row_len = LU.row_position[i + 1] - row_start;
+            
             // Divide by pivot element
-            temp = LU.values[i * LU.cols + k] /= LU.values[k * LU.cols + k];
-
-            for (j = k + 1; j < n; j++)
+            // Check if LU[i, k] is non-zero
+            temp = 0;
+            for (j = 0; j < row_len; j++)
             {
-                LU.values[i * LU.cols + j] -= temp * LU.values[k * LU.cols + j];
+                col_indx = LU.col_index[row_start + j];
+                if (col_index == k)
+                    temp = LU.values[row_start + j] /= piv_elements[k];
+                    break;
+            }
+
+            if (temp != 0)
+            { 
+                for (j = 0; j < row_len; j++)
+                {
+                    col_indx = LU.col_index[row_start + j];
+                    if (col_indx >= k + 1)  // check from original loop
+                    {
+                        if (col_indx ==
+                        row_start2 = LU.row_position[k];
+                        row_len2 = LU.row_position[k + 1] - row_start2;
+                        for (int r = 0; r < row_len2; r++)
+                        {
+                            // need to check if things in this expression are not zero
+                            // need to insert new elements
+                            LU.values[i * LU.cols + j] -= temp * LU.values[k * LU.cols + j];
+                        }
+                        break;
+                    }
+                }
             }
         }
-    }*/
+    }
     return perm_indx;
-
 }
 
 // Linear solver that uses LU decomposition
@@ -340,10 +383,21 @@ void SparseSolver<T>::lu_solve(CSRMatrix<T> &LU, std::vector<int> &perm_indx, st
     for (i = n - 1; i >= 0; i--)
     {
         sum = x[i];
-        for (j = i + 1; j < n; j++)
+        row_start = LU.row_position[i];
+        row_len = LU.row_position[i + 1] - row_start;
+        for (j = 0; j < row_len; j++)
         {
-            sum -= LU.values[i * LU.cols + j] * x[j];
+            col_indx = LU.col_index[row_start + j];
+            if (col_indx >= i + 1) 
+                sum -= LU.values[row_start + j] * x[col_indx];
         }
-        x[i] = sum / LU.values[i * LU.cols + i];
+        // Find diagonal element
+        for (j = 0; j < row_len; j++)
+        {
+            col_indx = LU.col_index[row_start + j];
+            if (col_indx == i) {
+                x[i] = sum / LU.values[row_start + j];
+                break;}
+        }
     }
 }
