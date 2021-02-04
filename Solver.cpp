@@ -124,7 +124,7 @@ std::vector<int> Solver<T>::lu_decomp(Matrix<T> &LU)
 LU decomposition
 Algorithm based on similar method as in 'Numerical recipes C++'.
 The input matrix A is copied to LU, which is modified 'in place'.
-Uses Crout's method by setting L_ii = 1.
+Uses Crout's method by setting U_ii = 1.
 Partial pivoting is implemented to ensure the stability of the method.
 Implicit pivoting used to make it independent of scaling of equations.
 */
@@ -155,7 +155,7 @@ Implicit pivoting used to make it independent of scaling of equations.
                 max = temp;
         }
         if (max == 0)
-            throw("Matrix is singular");
+            throw std::invalid_argument("Matrix is singular");
         scaling[i] = 1.0 / max;
     }
 

@@ -204,7 +204,7 @@ Partial pivoting is implemented to ensure the stability of the method.
 Implicit pivoting used to make it independent of scaling of equations.
 */
 {
-    int n, max_ind, i, j, k, row_start, row_end, nrow_vals;
+    int n, max_ind, i, j, k, row_start, row_len, nrow_vals;
     n = A.rows;
     T max, temp;
 
@@ -230,10 +230,10 @@ Implicit pivoting used to make it independent of scaling of equations.
     {
         max = 0.0;
         row_start = LU.row_position[i];
-        row_end = LU.row_position[i + 1];
-        for (j = row_start; j < row_end; j++)
+        row_len = LU.row_position[i + 1] - row_start;
+        for (j = 0; j < row_len; j++)
         {
-            temp = abs(LU.values[j]);
+            temp = abs(LU.values[row_start + j]);
             if (temp > max)
                 max = temp;
         }
@@ -247,14 +247,20 @@ Implicit pivoting used to make it independent of scaling of equations.
     // Inner LU loop resembles inner loop of matrix multiplication.
     // Uses kij permutation to loop over elements as fastest for
     // row major storage and easiest to implement pivoting for.
+
+
+    // Loop over Upper matrix to find largest B to pivot with
+    // Pivot by swapping row k by row with max pivot element
+    // Perform the inner loop of LU decomp, reduce remaining submatrix
+
+
+
     for (k = 0; k < n; k++)
     {
         max = 0.0;
-        row_start = LU.row_position[i];
-        row_end = LU.row_position[i + 1];
         for (i = k; i < n; i++)
         {
-            temp = scaling[i] * abs(LU.values[i * LU.cols + k]);
+            temp = scaling[i] * abs(LU.values[LU.row_position[i] + k]);
             // Store best pivot row so far
             if (temp > max)
             {
@@ -296,7 +302,7 @@ template <class T>
 void SparseSolver<T>::lu_solve(CSRMatrix<T> &LU, std::vector<int> &perm_indx, std::vector<T> &x)
 // Solve the equations L*y = b and U*x = y to find x.
 {
-    int n, kp, i, j, k;
+    int n, ip, i, j, row_start, row_len;
     n = LU.rows;
     T sum;
 
@@ -309,30 +315,45 @@ void SparseSolver<T>::lu_solve(CSRMatrix<T> &LU, std::vector<int> &perm_indx, st
     {
         x[i] = b[i];
     }
-
     // Perform forward substitution to solve L*y = b.
     // Need to keep track of permutation of RHS as well
-    for (k = 0; k < n; k++)
+    for (i = 0; i < n; i++)
     {
-        kp = perm_indx[k];
-        sum = x[kp];
-        x[kp] = x[k];
-        for (j = 0; j < k; j++)
+        ip = perm_indx[i];
+        sum = x[ip];
+        x[ip] = x[i];
+        row_start = LU.row_position[i];
+        row_len = LU.row_position[i + 1] - row_start;
+        for (j = 0; j < row_len; j++)
         {
-            sum -= LU.values[k * LU.cols + j] * x[j];
+            if (LU.col_index[row_start + j] < i)
+                sum -= LU.values[row_start + j] * x[j];
         }
-        x[k] = sum;
-    }
+        x[i] = sum;
+    } 
 
+    /*
+    for (i = 0; i < n; i++)
+    {
+        ip = perm_indx[i];
+        sum = x[ip];
+        x[ip] = x[i];
+        for (j = 0; j < i; j++)
+        {
+            sum -= LU.values[i * LU.cols + j] * x[j];
+        }
+        x[i] = sum;
+    }
+    */
     // Perform backward substitution to solve U*x = y
     // Here x = y before being updated.
-    for (k = n - 1; k >= 0; k--)
+    for (i = n - 1; i >= 0; i--)
     {
-        sum = x[k];
-        for (j = k + 1; j < n; j++)
+        sum = x[i];
+        for (j = i + 1; j < n; j++)
         {
-            sum -= LU.values[k * LU.cols + j] * x[j];
+            sum -= LU.values[i * LU.cols + j] * x[j];
         }
-        x[k] = sum / LU.values[k * LU.cols + k];
+        x[i] = sum / LU.values[i * LU.cols + i];
     }
 }
