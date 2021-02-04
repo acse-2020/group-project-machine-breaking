@@ -1,5 +1,6 @@
 #include <iostream>
 #include "CSRMatrix.h"
+#include <algorithm>
 
 template <class T>
 CSRMatrix<T>::CSRMatrix(int rows, int cols, int nnzs, bool preallocate) : Matrix<T>(rows, cols, false), nnzs(nnzs)
