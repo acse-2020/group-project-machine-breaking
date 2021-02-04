@@ -51,8 +51,10 @@ void test_matmatmult_5x5()
 
 int main()
 {
-    int rows = 4;
-    int cols = 4;
+    //int rows = 4;
+    //int cols = 4;
+    int rows = 5;
+    int cols = 5;
     /*double tol = 1e-6;
     int it_max = 1000;
 
@@ -95,7 +97,8 @@ int main()
     // sparse matrix solver. Result should be: {3.2, 7.8, 5.9, 7.3}
     std::cout << std::endl
               << "Sparse Matrix: " << std::endl;
-    int nnzs = 4;
+    //int nnzs = 4;
+    int nnzs = 13;
     //int init_row_position[] = {0, 1, 2, 3, 4};
     //int init_col_index[] = {0, 1, 2, 3};
     //double init_sparse_values[] = {2, 1, 3, 7};
@@ -103,7 +106,7 @@ int main()
     int init_row_position[] = {0, 2, 4, 7, 11, 14};
     int init_col_index[] = {0, 4, 0, 1, 1, 2, 3, 0, 2, 3, 4, 1, 3, 4};
     double init_sparse_values[] = {10, -2, 3, 9, 7, 8, 7, 3, 8, 7, 5, 8, 9, 13};
-    std::vector<double> b_sparse = {6.4, 7.8, 56.7, 51.1};
+    std::vector<double> b_sparse = {6.4, 7.8, 56.7, 51.1, 1};
     
     std::vector<double> x_sparse(rows, 0);
     std::vector<double> x_sparse_CG(rows, 0);
@@ -119,11 +122,11 @@ int main()
     */
 
     auto LU_sparse = CSRMatrix<double>(rows, cols, nnzs, true);
-    //auto piv = sparse_solver.lu_decomp(LU_sparse);
-    std::vector<int> piv = {0, 1, 2, 3};
+    auto piv = sparse_solver.lu_decomp(LU_sparse);
+    std::vector<int> piv2 = {0, 1, 2, 3};
     LU_sparse.print2DMatrix();
-    sparse_solver.lu_solve(LU_sparse, piv, x_sparse_LU);
-    sparse_matrix.print2DMatrix();
+    sparse_solver.lu_solve(LU_sparse, piv2, x_sparse_LU);  // set piv2 back to piv
+    //sparse_matrix.print2DMatrix();
     LU_sparse.print2DMatrix();
     printVector(x_sparse_LU);
 
