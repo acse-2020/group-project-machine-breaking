@@ -1,6 +1,8 @@
 #pragma once
 #include "Matrix.h"
 #include <vector>
+#include <memory>
+
 template <class T>
 class CSRMatrix : public Matrix<T>
 {
@@ -16,8 +18,7 @@ public:
 
     void matVecMult(std::vector<T> &input, std::vector<T> &output);
 
-    // TODO: implement sparse matMatMult
-    CSRMatrix<T> matMatMult(CSRMatrix<T> &mat_right);
+    std::shared_ptr<CSRMatrix<T>>  matMatMult(CSRMatrix<T> &mat_right);
 
     int *row_position = nullptr;
     int *col_index = nullptr;

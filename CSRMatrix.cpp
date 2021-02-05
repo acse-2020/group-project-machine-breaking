@@ -5,6 +5,7 @@
 template <class T>
 CSRMatrix<T>::CSRMatrix(int rows, int cols, int nnzs, bool preallocate) : Matrix<T>(rows, cols, false), nnzs(nnzs)
 {
+
     this->preallocated = preallocate;
     if (this->preallocated)
     {
@@ -103,7 +104,7 @@ void CSRMatrix<T>::matVecMult(std::vector<T> &input, std::vector<T> &output)
 }
 
 template <class T>
-CSRMatrix<T> CSRMatrix<T>::matMatMult(CSRMatrix<T> &mat_right)
+std::shared_ptr<CSRMatrix<T>> CSRMatrix<T>::matMatMult(CSRMatrix<T> &mat_right)
 {
     // for now, we assume output has been preallocated
     std::vector<T> output_all_values{};
@@ -174,20 +175,19 @@ CSRMatrix<T> CSRMatrix<T>::matMatMult(CSRMatrix<T> &mat_right)
     int init_col_index[] = {0, 1, 2, 3};
     double init_sparse_values[] = {2, 1, 3, 7};
 
-    CSRMatrix<T> result = CSRMatrix<T>(this->rows, mat_right.cols, output_cols.size(), true);
+    std::shared_ptr<CSRMatrix<T>> result(new CSRMatrix<T>(this->rows, mat_right.cols, output_cols.size(), true));
 
     for (int i = 0; i < output_cols.size(); i++)
     {
-        result.col_index[i] = output_cols[i];
+        result->col_index[i] = output_cols[i];
     }
     for (int i = 0; i <= this->rows; i++)
     {
-        result.row_position[i] = output_row_position[i];
+        result->row_position[i] = output_row_position[i];
     }
     for (int i = 0; i < output_all_values.size(); i++)
     {
-        result.values[i] = output_all_values[i];
+        result->values[i] = output_all_values[i];
     }
-
     return result;
 }
