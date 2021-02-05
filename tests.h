@@ -248,6 +248,41 @@ bool test_lu_dense()
     return true;
 }
 
+bool test_lu_dense_random()
+{
+    int size = 4;
+    std::vector<double> x(size, 0);
+    // Solver<double> *solver = nullptr;
+
+    Solver<double> *solver = Solver<double>::makeSolver(size);
+    // delete solver;
+
+    // create_dense_solver(size, solver);
+    // std::unique_ptr<Solver<double>> solver = solver_factory(size);
+    std::cout << solver->A.values[0] << std::endl;
+
+    delete solver; // why does this not work???
+
+    // Matrix<double> LU(size, size, true);
+
+    // clock_t t = clock();
+    // std::vector<int> piv = solver->lu_decomp(LU);
+    // solver->lu_solve(LU, piv, x);
+    // t = clock() - t;
+
+    // std::vector<double> b_estimate(size, 0);
+
+    // std::cout << "Time taken for LU: " << ((float)t) / CLOCKS_PER_SEC << std::endl;
+
+    // if (solver->residualCalc(x, b_estimate) > 1e-6)
+    // {
+    //     TestRunner::testError("LU residual is above 1e-6");
+    //     return false;
+    // }
+
+    return true;
+}
+
 void run_tests()
 {
     TestRunner test_runner = TestRunner();
@@ -260,4 +295,5 @@ void run_tests()
     //test_runner.test(&test_lu_dense, "dense LU solver for 4x4 matrix.");
     //test_runner.test(&test_sparse_jacobi, "sparse Jacobi solver for 4x4 matrix.");
     //test_runner.test(&test_sparse_CG, "sparse conjugate gradient solver for 4x4 matrix.");
+    //test_runner.test(&test_lu_dense_random, "dense LU with random matrices.");
 }
