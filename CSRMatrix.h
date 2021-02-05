@@ -24,6 +24,8 @@ public:
     std::shared_ptr<int[]> row_position; //create nullpointer
     std::shared_ptr<int[]> col_index;    // create nullpointer
 
+    CSRMatrix<T> transpose();
+
     // number of non-zeros
     int nnzs = -1;
 
