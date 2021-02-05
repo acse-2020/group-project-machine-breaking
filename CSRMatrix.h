@@ -8,7 +8,7 @@ class CSRMatrix : public Matrix<T>
 {
 public:
     CSRMatrix(int rows, int cols, int nnzs, bool preallocate);
-    //CSRMatrix(int rows, int cols, int nnzs, T *values_ptr, int *row_pos, int *col_ind);
+
     CSRMatrix(int rows, int cols, int nnzs, std::shared_ptr<T[]> values_ptr, std::shared_ptr<int[]> row_pos, std::shared_ptr<int[]> col_ind);
 
     ~CSRMatrix();
@@ -21,10 +21,8 @@ public:
 
     std::shared_ptr<CSRMatrix<T>>  matMatMult(CSRMatrix<T> &mat_right);
 
-    //int *row_position = nullptr;
-    //int *col_index = nullptr;
-    std::shared_ptr<T[]> row_position;  //create nullpointer
-    std::shared_ptr<T[]> col_index; // create nullpointer
+    std::shared_ptr<int[]> row_position;  //create nullpointer
+    std::shared_ptr<int[]> col_index; // create nullpointer
 
     // number of non-zeros
     int nnzs = -1;

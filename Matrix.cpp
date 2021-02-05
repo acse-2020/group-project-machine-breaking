@@ -11,10 +11,8 @@ Matrix<T>::Matrix(int rows, int cols, bool preallocate) : rows(rows), cols(cols)
     // If we want to handle memory ourselves
     if (this->preallocated)
     {
-        // Must remember to delete this in the destructor
         std::shared_ptr<T[]> vals(new T[this->size_of_values]);
         this->values = vals;
-        //this->values = new T[size_of_values];
     }
 }
 
@@ -35,14 +33,10 @@ Matrix<T>::Matrix()
 template <class T>
 Matrix<T>::Matrix(const Matrix<T> &M2)
 {
-    std::cout << "Matrix copy constructor" << std::endl;
     rows = M2.rows;
     cols = M2.cols;
     size_of_values = rows * cols;
-    std::cout << "size " << M2.size_of_values << std::endl;
-    //values = T[M2.size_of_values];
     values = std::shared_ptr<T[]>(new T[this->size_of_values]);
-    //std::shared_ptr<T[]> values(new T[this->size_of_values]);
     for (int i = 0; i < M2.size_of_values; i++)
     {
         values[i] = M2.values[i];
@@ -54,15 +48,12 @@ Matrix<T>::Matrix(const Matrix<T> &M2)
 template <class T>
 Matrix<T>& Matrix<T>::operator=(const Matrix<T>& M2)
 {
-    std::cout << "Matrix copy constructor assignemnt" << std::endl;
     // self-assignment check
     if (this == &M2)
         return *this;
     rows = M2.rows;
     cols = M2.cols;
     size_of_values = rows * cols;
-    std::cout << "size " << M2.size_of_values << std::endl;
-    //values = T[M2.size_of_values];
     values = std::shared_ptr<T[]>(new T[this->size_of_values]);
     for (int i = 0; i < M2.size_of_values; i++)
     {
@@ -77,11 +68,6 @@ Matrix<T>& Matrix<T>::operator=(const Matrix<T>& M2)
 template <class T>
 Matrix<T>::~Matrix()
 {
-    // Delete the values array
-    if (this->preallocated)
-    {
-        //delete[] this->values;
-    }
 }
 
 // Just print out the values in our values array

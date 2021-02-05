@@ -23,12 +23,7 @@ Solver<T>::Solver(Matrix<T> &A, std::vector<T> &b) : A(A), b(b)
 template <class T>
 Solver<T>::Solver(const Solver<T> &S2)
 {
-    std::cout << "Solver copy constructor" << std::endl;
-    std::cout << "A size " << S2.A.size_of_values << std::endl;
-    //Matrix<T> Atemp = S2.A;  // copy constructor defined in Matrix class
-    //std::shared_ptr<Matrix<T>> Atemp = std::make_shared<Matrix<T>> (S2.A); //A(new Matrix<T>::Matrix(S2.A));
-    A = S2.A;
-    //std::shared_ptr<Matrix<T>> this->A = std::make_shared<Matrix<T>>(S2.A);
+    A = S2.A; // Assignment operator overloaded for Matrix to deepcopy
     std::vector<T> btemp = S2.b;  // vector comes with copy constructor
     b = btemp;
 }
