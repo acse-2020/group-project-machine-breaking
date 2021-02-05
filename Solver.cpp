@@ -1,10 +1,13 @@
 #include <iostream>
 #include <math.h>
 #include "Solver.h"
+#include "Matrix.h"
 #include <stdexcept>
 #include <vector>
+#include <memory>
 #include "utilities.h"
 
+// Constructor
 template <class T>
 Solver<T>::Solver(Matrix<T> &A, std::vector<T> &b) : A(A), b(b)
 {
@@ -16,15 +19,28 @@ Solver<T>::Solver(Matrix<T> &A, std::vector<T> &b) : A(A), b(b)
     }
 }
 
-// destructor
+// Copy constructor
+template <class T>
+Solver<T>::Solver(const Solver<T> &S2)
+{
+    std::cout << "Solver copy constructor" << std::endl;
+    std::cout << "A size " << S2.A.size_of_values << std::endl;
+    //Matrix<T> Atemp = S2.A;  // copy constructor defined in Matrix class
+    //std::shared_ptr<Matrix<T>> Atemp = std::make_shared<Matrix<T>> (S2.A); //A(new Matrix<T>::Matrix(S2.A));
+    A = S2.A;
+    //std::shared_ptr<Matrix<T>> this->A = std::make_shared<Matrix<T>>(S2.A);
+    std::vector<T> btemp = S2.b;  // vector comes with copy constructor
+    b = btemp;
+}
 
+// destructor
 template <class T>
 Solver<T>::~Solver()
 {
 }
 
 template <class T>
-Solver<T> *Solver<T>::makeSolver(int size)
+Solver<T> Solver<T>::makeSolver(int size)
 {
     // retuns a pointer that needs to be deleted
     // create random diagonally dominant matrices
@@ -47,7 +63,7 @@ Solver<T> *Solver<T>::makeSolver(int size)
 
     std::vector<double> b(4, 0);
 
-    return new Solver(m, b);
+    return Solver<T>(m, b);
 }
 
 template <class T>

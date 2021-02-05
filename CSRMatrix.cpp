@@ -10,14 +10,22 @@ CSRMatrix<T>::CSRMatrix(int rows, int cols, int nnzs, bool preallocate) : Matrix
     if (this->preallocated)
     {
         // Values and col index should be same length, while rows should be no.rows + 1
-        this->values = new T[this->nnzs];
-        this->row_position = new int[this->rows + 1];
-        this->col_index = new int[this->nnzs];
+        std::shared_ptr<T[]> vals(new T[this->nnzs]);
+        std::shared_ptr<int[]> rows(new int[this->nnzs+1]);
+        std::shared_ptr<int[]> cols(new int[this->nnzs]);
+        this->values = vals;
+        this->row_position = rows;
+        this->col_index = cols;
+        //this->values = new T[this->nnzs];
+        //this->row_position = new int[this->rows + 1];
+        //this->col_index = new int[this->nnzs];
     }
 }
 
 template <class T>
-CSRMatrix<T>::CSRMatrix(int rows, int cols, int nnzs, T *values_ptr, int *row_pos, int *col_ind) : Matrix<T>(rows, cols, values_ptr), nnzs(nnzs), row_position(row_pos), col_index(col_ind)
+//CSRMatrix<T>::CSRMatrix(int rows, int cols, int nnzs, T *values_ptr, int *row_pos, int *col_ind) : Matrix<T>(rows, cols, values_ptr), nnzs(nnzs), row_position(row_pos), col_index(col_ind)
+CSRMatrix<T>::CSRMatrix(int rows, int cols, int nnzs, std::shared_ptr<T[]> values_ptr, std::shared_ptr<int[]> row_pos, std::shared_ptr<int[]> col_ind)
+               : Matrix<T>(rows, cols, values_ptr), nnzs(nnzs), row_position(row_pos), col_index(col_ind)
 {
 }
 
@@ -27,8 +35,8 @@ CSRMatrix<T>::~CSRMatrix()
     // values pointer is deleted in Matrix destructor
     if (this->preallocated)
     {
-        delete[] this->row_position;
-        delete[] this->col_index;
+        //delete[] this->row_position;
+        //delete[] this->col_index;
     }
 }
 

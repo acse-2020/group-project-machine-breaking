@@ -1,15 +1,26 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include <memory>
 
 template <class T>
 class Matrix
 {
 public:
+    // default constructor
+    Matrix(void);
+
     // constructor where we want to preallocate ourselves
     Matrix(int rows, int cols, bool preallocate);
+    
     // constructor where we already have allocated memory outside
-    Matrix(int rows, int cols, T *values_ptr);
+    Matrix(int rows, int cols, std::shared_ptr<T[]> &values_ptr);
+
+    // Copy constructor
+    Matrix(const Matrix<T> &M2);
+
+    Matrix<T>& Matrix<T>::operator=(const Matrix<T>& M2);
+
     // destructor
     virtual ~Matrix();
 
@@ -27,7 +38,8 @@ public:
     //virtual void Jacobi(Matrix &RHS, Matrix &unknowns, double &tol, int &it_max);
 
     // Explicitly using the C++11 nullptr here
-    T *values = nullptr;
+    //T *values = nullptr;
+    std::shared_ptr<T[]> values;
     int rows = -1;
     int cols = -1;
 

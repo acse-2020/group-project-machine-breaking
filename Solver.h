@@ -14,11 +14,14 @@ public:
     // constructor
     Solver(Matrix<T> &A, std::vector<T> &b);
 
+    // Copy constructor
+    Solver(const Solver<T> &S2);
+
     // destructor
     virtual ~Solver();
 
     // factory function
-    static Solver<T> *makeSolver(int size);
+    Solver<T> makeSolver(int size);
 
     double residualCalc(std::vector<T> &x, std::vector<T> &b_estimate);
 

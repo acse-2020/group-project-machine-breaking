@@ -2,6 +2,7 @@
 #include <math.h>
 #include <ctime>
 #include <vector>
+#include <memory>
 #include "Matrix.h"
 #include "Matrix.cpp"
 #include "CSRMatrix.h"
@@ -12,7 +13,7 @@
 #include "SparseSolver.cpp"
 #include "TestRunner.h"
 #include "utilities.h"
-
+/*
 // test functions should start with 'test_' prefix
 bool test_sparse_matmatmult_5x5()
 {
@@ -247,21 +248,40 @@ bool test_lu_dense()
 
     return true;
 }
-
+*/
 bool test_lu_dense_random()
 {
     int size = 4;
     std::vector<double> x(size, 0);
     // Solver<double> *solver = nullptr;
 
-    Solver<double> *solver = Solver<double>::makeSolver(size);
+    //auto *solver = new Solver<double>::makeSolver(size);
+
+    //double init_dense_values[] = { 10., 2., 3., 5., 1., 14., 6., 2., -1., 4., 16., -4, 5., 4., 3., 11. };
+    std::shared_ptr<double[]> init_dense_values(new double[size * size]{ 10., 2., 3., 5., 1., 14., 6., 2., -1., 4., 16., -4, 5., 4., 3., 11. });
+    //std::unique_ptr<double[]> init_dense_values(new double[size * size]);
+    //(10., 2., 3., 5., 1., 14., 6., 2., -1., 4., 16., -4, 5., 4., 3., 11.);
+    //init_dense_values = { 10., 2., 3., 5., 1., 14., 6., 2., -1., 4., 16., -4, 5., 4., 3., 11. };
+    //unique_ptr<A> ptr = unique_ptr<A>(new A(1234));
+
+    Matrix<double> dense_mat = Matrix<double>(size, size, init_dense_values);
+    //Matrix<double> copy_mat = dense_mat;
+    std::cout << dense_mat.values[0] << " " << &dense_mat.values[0] << std::endl;
+    //std::cout << copy_mat.values[0] << " " << &copy_mat.values[0] << std::endl;
+    std::vector<double> b = { 1., 2., 3., 4. };
+
+    Solver<double> dense_solver = Solver<double>(dense_mat, b);
+    std::cout << dense_solver.A.values[0] << " " << &dense_solver.A.values[0] << std::endl;
+    Solver<double> solver = dense_solver;
+    std::cout << solver.b[0] << " " << &solver.b[0] << std::endl;
+    std::cout << solver.A.values[0] << " " << &solver.A.values[0] << std::endl;
     // delete solver;
 
     // create_dense_solver(size, solver);
     // std::unique_ptr<Solver<double>> solver = solver_factory(size);
-    std::cout << solver->A.values[0] << std::endl;
+    //std::cout << solver->A.values[0] << std::endl;
 
-    delete solver; // why does this not work???
+    //delete solver; // why does this not work???
 
     // Matrix<double> LU(size, size, true);
 
@@ -290,10 +310,10 @@ void run_tests()
     //test_runner.test(&test_check_dimensions_matching, "checkDimensions for matching matrices.");
     //test_runner.test(&test_check_dimensions_not_matching, "checkDimensions for non-matching matrices.");
     //test_runner.test(&test_sparse_matmatmult_4x4, "sparse matMatMult for two sparse 4x4 matrices.");
-    test_runner.test(&test_sparse_matmatmult_5x5, "sparse matMatMult for multiplying a 5x5 sparse matrix by itself.");
+    //test_runner.test(&test_sparse_matmatmult_5x5, "sparse matMatMult for multiplying a 5x5 sparse matrix by itself.");
     //test_runner.test(&test_dense_jacobi_and_gauss_seidl, "stationaryIterative: dense Jacobi and Gauss-Seidel solver for 4x4 matrix.");
     //test_runner.test(&test_lu_dense, "dense LU solver for 4x4 matrix.");
     //test_runner.test(&test_sparse_jacobi, "sparse Jacobi solver for 4x4 matrix.");
     //test_runner.test(&test_sparse_CG, "sparse conjugate gradient solver for 4x4 matrix.");
-    //test_runner.test(&test_lu_dense_random, "dense LU with random matrices.");
+    test_runner.test(&test_lu_dense_random, "dense LU with random matrices.");
 }
