@@ -17,6 +17,9 @@ public:
     // destructor
     virtual ~Solver();
 
+    // factory function
+    static Solver<T> *makeSolver(int size);
+
     double residualCalc(std::vector<T> &x, std::vector<T> &b_estimate);
 
     // Jacobi or Gauss-Seidel

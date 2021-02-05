@@ -24,6 +24,33 @@ Solver<T>::~Solver()
 }
 
 template <class T>
+Solver<T> *Solver<T>::makeSolver(int size)
+{
+    // retuns a pointer that needs to be deleted
+    // create random diagonally dominant matrices
+    auto m = Matrix<double>(size, size, true);
+
+    for (int i = 0; i < size; i++)
+    {
+        for (int j = 0; j < size; j++)
+        {
+            if (i == j)
+            {
+                m.values[i * size + j] = double(rand() % 10 + 10);
+            }
+            else
+            {
+                m.values[i * size + j] = double(rand() % 10);
+            }
+        }
+    }
+
+    std::vector<double> b(4, 0);
+
+    return new Solver(m, b);
+}
+
+template <class T>
 double Solver<T>::residualCalc(std::vector<T> &x, std::vector<T> &b_estimate)
 {
     double residual = 0;
