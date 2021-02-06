@@ -1,10 +1,13 @@
 #include <iostream>
 #include <math.h>
 #include "Solver.h"
+#include "Matrix.h"
 #include <stdexcept>
 #include <vector>
+#include <memory>
 #include "utilities.h"
 
+// Constructor
 template <class T>
 Solver<T>::Solver(Matrix<T> &A, std::vector<T> &b) : A(A), b(b)
 {
@@ -16,11 +19,46 @@ Solver<T>::Solver(Matrix<T> &A, std::vector<T> &b) : A(A), b(b)
     }
 }
 
-// destructor
+// Copy constructor
+template <class T>
+Solver<T>::Solver(const Solver<T> &S2)
+{
+    A = S2.A;                    // Assignment operator overloaded for Matrix to deepcopy
+    std::vector<T> btemp = S2.b; // vector comes with copy constructor
+    b = btemp;
+}
 
+// destructor
 template <class T>
 Solver<T>::~Solver()
 {
+}
+
+template <class T>
+Solver<T> Solver<T>::makeSolver(int size)
+{
+    // retuns a pointer that needs to be deleted
+    // create random diagonally dominant matrices
+    auto m = Matrix<double>(size, size, true);
+
+    for (int i = 0; i < size; i++)
+    {
+        for (int j = 0; j < size; j++)
+        {
+            if (i == j)
+            {
+                m.values[i * size + j] = double(rand() % 10 + 10);
+            }
+            else
+            {
+                m.values[i * size + j] = double(rand() % 10);
+            }
+        }
+    }
+
+    std::vector<double> b(4, 0);
+
+    return Solver<T>(m, b);
 }
 
 template <class T>

@@ -2,6 +2,7 @@
 #include <iostream>
 #include "Matrix.h"
 #include <math.h>
+#include <memory>
 
 // Constructor - using an initialisation list here
 template <class T>
@@ -10,28 +11,62 @@ Matrix<T>::Matrix(int rows, int cols, bool preallocate) : rows(rows), cols(cols)
     // If we want to handle memory ourselves
     if (this->preallocated)
     {
-        // Must remember to delete this in the destructor
-        this->values = new T[size_of_values];
+        std::shared_ptr<T[]> vals(new T[this->size_of_values]);
+        this->values = vals;
     }
 }
 
 // Constructor - now just setting the value of our pointer
-
 template <class T>
-Matrix<T>::Matrix(int rows, int cols, T *values_ptr) : rows(rows), cols(cols), size_of_values(rows * cols), values(values_ptr)
+//Matrix<T>::Matrix(int rows, int cols, T *values_ptr) : rows(rows), cols(cols), size_of_values(rows * cols), values(values_ptr)
+Matrix<T>::Matrix(int rows, int cols, std::shared_ptr<T[]> &values_ptr) : rows(rows), cols(cols), size_of_values(rows * cols), values(values_ptr)
 {
 }
 
-// destructor
+// Default constructor - creates emmpty matrix
+template <class T>
+Matrix<T>::Matrix()
+{
+}
 
+// Copy constructor
+template <class T>
+Matrix<T>::Matrix(const Matrix<T> &M2)
+{
+    rows = M2.rows;
+    cols = M2.cols;
+    size_of_values = rows * cols;
+    values = std::shared_ptr<T[]>(new T[this->size_of_values]);
+    for (int i = 0; i < M2.size_of_values; i++)
+    {
+        values[i] = M2.values[i];
+    }
+    preallocated = true;
+}
+
+// Copy constructor - overloading the assignement operator
+template <class T>
+Matrix<T> &Matrix<T>::operator=(const Matrix<T> &M2)
+{
+    // self-assignment check
+    if (this == &M2)
+        return *this;
+    rows = M2.rows;
+    cols = M2.cols;
+    size_of_values = rows * cols;
+    values = std::shared_ptr<T[]>(new T[this->size_of_values]);
+    for (int i = 0; i < M2.size_of_values; i++)
+    {
+        values[i] = M2.values[i];
+    }
+    preallocated = true;
+    return *this;
+}
+
+// destructor
 template <class T>
 Matrix<T>::~Matrix()
 {
-    // Delete the values array
-    if (this->preallocated)
-    {
-        delete[] this->values;
-    }
 }
 
 // Just print out the values in our values array
