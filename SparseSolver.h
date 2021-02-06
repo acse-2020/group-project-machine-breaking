@@ -2,7 +2,7 @@
 #pragma once
 #include "CSRMatrix.h"
 #include <vector>
-
+#include <memory>
 template <class T>
 class SparseSolver
 {
@@ -21,6 +21,6 @@ public:
 
     void conjugateGradient(std::vector<T> &x, double &tol, int &it_max);
 
-    std::vector<int> lu_decomp(CSRMatrix<T> &LU);
+    std::shared_ptr<CSRMatrix<T>> lu_decomp(CSRMatrix<T> &LU);
     void lu_solve(CSRMatrix<T> &LU, std::vector<int> &piv, std::vector<T> &x);
 };
