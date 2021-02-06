@@ -188,7 +188,7 @@ void SparseSolver<T>::conjugateGradient(std::vector<T> &x, double &tol, int &it_
 }
 
 template <class T>
-std::shared_ptr<CSRMatrix<T>> SparseSolver<T>::cholesky_decomp(CSRMatrix<T> &R)
+std::shared_ptr<CSRMatrix<T>> SparseSolver<T>::cholesky_decomp()
 {
     // for now, we assume output has been preallocated
     std::vector<T> R_values{};
@@ -199,8 +199,8 @@ std::shared_ptr<CSRMatrix<T>> SparseSolver<T>::cholesky_decomp(CSRMatrix<T> &R)
     for (int i = 0; i < A.rows; i++)
     {
         // rows indices of left matrix
-        int r_start = row_position[i];
-        int r_end = row_position[i + 1];
+        int r_start = A.row_position[i];
+        int r_end = A.row_position[i + 1];
 
         // loop over column indices for this row in A - equivalent to rows in B
         std::vector<int> cols_nnzs{};
@@ -209,21 +209,21 @@ std::shared_ptr<CSRMatrix<T>> SparseSolver<T>::cholesky_decomp(CSRMatrix<T> &R)
         std::vector<int> infills_left{};
         for (int cii = r_start; (cii < r_end && ci < i); cii++)
         {
-            ci = col_index[cii];
+            ci = A.col_index[cii];
 
             for (int k = 0; k < ci; k++)
             {
-                if (cii != r_start && k == col_index[cii - 1])
+                if (cii != r_start && k == A.col_index[cii - 1])
                 {
-                    infills_left.push_back(col_index[cii - 1]);
+                    infills_left.push_back(A.col_index[cii - 1]);
                 }
                 for (int r = 0; r < k && k > 0; r++)
                 {
-                    int r_start_above = row_position[r];
-                    int r_end_above = row_position[r + 1];
+                    int r_start_above = A.row_position[r];
+                    int r_end_above = A.row_position[r + 1];
                     for (int a = r_start_above; a < r_end_above; a++)
                     {
-                        if (infills_left.size() > 0 && col_index[a] == k)
+                        if (infills_left.size() > 0 && A.col_index[a] == k)
                         {
                             cols_nnzs.push_back(k);
                         }
@@ -249,7 +249,7 @@ std::shared_ptr<CSRMatrix<T>> SparseSolver<T>::cholesky_decomp(CSRMatrix<T> &R)
 
         if (i == 0)
         {
-            R_values.push_back(sqrt(this->values[0]));
+            R_values.push_back(sqrt(A.values[0]));
         }
 
         // Entries in R on row i
@@ -267,7 +267,7 @@ std::shared_ptr<CSRMatrix<T>> SparseSolver<T>::cholesky_decomp(CSRMatrix<T> &R)
                     T A_i0;
                     for (int k = r_start; k < r_end; k++)
                     {
-                        if (col_index[k] == 0)
+                        if (A.col_index[k] == 0)
                         {
                             A_i0 = A.values[k];
                             R_values.push_back(A_i0 / R_values[0]);
@@ -307,7 +307,7 @@ std::shared_ptr<CSRMatrix<T>> SparseSolver<T>::cholesky_decomp(CSRMatrix<T> &R)
                             // Determine whether ij entry in L also appears in A, else we use a 0
                             for (int k = r_start; k < r_end; k++)
                             {
-                                if (ci == col_index[k])
+                                if (ci == A.col_index[k])
                                 {
                                     A_ij = A.values[k];
                                 }
@@ -333,7 +333,7 @@ std::shared_ptr<CSRMatrix<T>> SparseSolver<T>::cholesky_decomp(CSRMatrix<T> &R)
                     int diag;
                     for (diag = r_start; diag < r_end; diag++)
                     {
-                        if (col_index[diag] == i)
+                        if (A.col_index[diag] == i)
                         {
                             A_jj = A.values[diag];
                         }
@@ -367,10 +367,14 @@ void SparseSolver<T>::cholesky_solve(CSRMatrix<T> &R, std::vector<T> &x)
 // Solve the equations L*y = b and U*x = y to find x.
 {
     int n, ip, i, j, row_start, row_len, col_start, col_indx;
-    n = LU.rows;
+    n = R.rows;
     T sum;
 
     checkDimensions(A, x);
+
+    std::shared_ptr<CSRMatrix<T>> R_T = R.transpose();
+
+    R_T->print2DMatrix();
 
     // The unknown x will be used as temporary storage for y.
     // The equations for forward and backward substitution have
@@ -383,20 +387,21 @@ void SparseSolver<T>::cholesky_solve(CSRMatrix<T> &R, std::vector<T> &x)
     // Need to keep track of permutation of RHS as well
     for (i = 0; i < n; i++)
     {
-        ip = perm_indx[i];
-        sum = x[ip];
-        x[ip] = x[i];
-        // row_start = LU.row_position[i];
-        // row_len = LU.row_position[i + 1] - row_start;
-        for (j = LU.row_position[i]; j < LU.row_position[i + 1]; j++)
+        // ip = perm_indx[i];
+        sum = x[i];
+        // x[ip] = x[i];
+        // row_start = R.row_position[i];
+        // row_len = R.row_position[i + 1] - row_start;
+        for (j = R.row_position[i]; j < R.row_position[i + 1]; j++)
         {
-            col_indx = LU.col_index[j];
+            col_indx = R.col_index[j];
             // check if valid and exits loop to avoid uneccesary checks
             if (col_indx >= i)
                 break;
-            sum -= LU.values[j] * x[col_indx];
+            sum -= R.values[j] * x[col_indx];
         }
         x[i] = sum;
+        // std::cout << "sum: " << x[i] << std::endl;
     }
 
     // Perform backward substitution to solve U*x = y
@@ -404,21 +409,21 @@ void SparseSolver<T>::cholesky_solve(CSRMatrix<T> &R, std::vector<T> &x)
     for (i = n - 1; i >= 0; i--)
     {
         sum = x[i];
-        row_start = LU.row_position[i];
-        row_len = LU.row_position[i + 1] - row_start;
+        row_start = R_T->row_position[i];
+        row_len = R_T->row_position[i + 1] - row_start;
         for (j = 0; j < row_len; j++)
         {
-            col_indx = LU.col_index[row_start + j];
+            col_indx = R_T->col_index[row_start + j];
             if (col_indx >= i + 1)
-                sum -= LU.values[row_start + j] * x[col_indx];
+                sum -= R_T->values[row_start + j] * x[col_indx];
         }
         // Find diagonal element
         for (j = 0; j < row_len; j++)
         {
-            col_indx = LU.col_index[row_start + j];
+            col_indx = R_T->col_index[row_start + j];
             if (col_indx == i)
             {
-                x[i] = sum / LU.values[row_start + j];
+                x[i] = sum / R_T->values[row_start + j];
                 break;
             }
         }
