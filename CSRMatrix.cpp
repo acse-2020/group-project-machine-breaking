@@ -248,12 +248,6 @@ CSRMatrix<T> CSRMatrix<T>::cholesky()
     std::vector<int> R_cols{};
     std::vector<int> R_row_position(this->rows + 1, 0);
 
-    /*
-    Rjj = sqrt(Ajj - sum(Rjk[:j]^2)
-
-    Rij = sqrt(Aij - sum(Rik[:j]*Rjk[:j]^2); for i>j
-    */
-
     // loop over rows of A
     for (int i = 0; i < this->rows; i++)
     {
@@ -270,30 +264,21 @@ CSRMatrix<T> CSRMatrix<T>::cholesky()
         {
             ci = col_index[cii];
 
-            // std::cout << "No. of items in row: " << cols_nnzs.size() << std::endl;
-            // std::cout << "row: " << i << std::endl;
-            // std::cout << "column: " << ci << std::endl;
-
             for (int k = 0; k < ci; k++)
             {
-                // std::cout << "columns left: " << k << std::endl;
                 if (cii != r_start && k == col_index[cii - 1])
                 {
                     infills_left.push_back(col_index[cii - 1]);
                 }
-
                 for (int r = 0; r < k && k > 0; r++)
                 {
                     int r_start_above = row_position[r];
                     int r_end_above = row_position[r + 1];
-                    // std::cout << "rows above: " << r << std::endl;
                     for (int a = r_start_above; a < r_end_above; a++)
                     {
                         if (infills_left.size() > 0 && col_index[a] == k)
                         {
-
                             cols_nnzs.push_back(k);
-                            // std::cout << "No. of items in row: " << cols_nnzs.size() << std::endl;
                         }
                     }
                 }
@@ -302,35 +287,129 @@ CSRMatrix<T> CSRMatrix<T>::cholesky()
             {
                 cols_nnzs.push_back(ci);
             }
-
-            // std::cout << "No. of items in row: " << cols_nnzs.size() << std::endl;
         }
         cols_nnzs.push_back(i);
         // sort non_zeros & remove duplicates
         sort(cols_nnzs.begin(), cols_nnzs.end());
         cols_nnzs.erase(unique(cols_nnzs.begin(), cols_nnzs.end()), cols_nnzs.end());
 
-        R_row_position[i + 1] = R_row_position[i] + cols_nnzs.size();
-
         // Concatenate
         for (int j = 0; j < cols_nnzs.size(); j++)
         {
             R_cols.push_back(cols_nnzs[j]);
-            R_values.push_back(1);
+        }
+        R_row_position[i + 1] = R_row_position[i] + cols_nnzs.size();
+
+        if (i == 0)
+        {
+            R_values.push_back(sqrt(this->values[0]));
+        }
+
+        // Entries in R on row i
+        int R_r_start = R_row_position[i];
+        int R_r_end = R_row_position[i + 1];
+        if (i != 0)
+        {
+            for (int cii = R_r_start; cii < R_r_end; cii++)
+            {
+                ci = R_cols[cii];
+
+                if (ci == 0)
+                {
+
+                    T A_i0;
+                    for (int k = r_start; k < r_end; k++)
+                    {
+                        if (col_index[k] == 0)
+                        {
+                            A_i0 = this->values[k];
+                            R_values.push_back(A_i0 / R_values[0]);
+                        }
+                    }
+                }
+
+                T sum_ij = 0;
+                if (ci != 0 && ci != i)
+                {
+
+                    int r_start_above = R_row_position[i - 1];
+                    int r_end_above = R_row_position[i];
+
+                    for (int n = R_r_start; n < R_r_end; n++)
+                    {
+                        // Loop through columns[:j] in row above current entry[i, ci]
+                        for (int a = r_start_above; a < r_end_above; a++)
+                        {
+                            // Match cols in current and above rows
+                            if (R_cols[n] == R_cols[a])
+                            {
+                                sum_ij += R_values[n] * R_values[a];
+                            }
+                        }
+                    }
+
+                    int diag_r_start = R_row_position[ci];
+                    int diag_r_end = R_row_position[ci + 1];
+
+                    // Loop through row that contains diagonal L entry on current column
+                    for (int diag = diag_r_start; diag < diag_r_end; diag++)
+                    {
+                        if (R_cols[diag] == ci)
+                        {
+                            T A_ij = 0;
+                            // Determine whether ij entry in L also appears in A, else we use a 0
+                            for (int k = r_start; k < r_end; k++)
+                            {
+                                if (ci == col_index[k])
+                                {
+                                    A_ij = this->values[k];
+                                }
+                            }
+
+                            // Lij = (Lij - sum(Lik[:j]*Rjk[:j])/Ljj; for i>j
+                            R_values.push_back((A_ij - sum_ij) / R_values[diag]);
+                        }
+                    }
+                }
+
+                T sum_jj = 0;
+                if (ci != 0 && ci == i)
+                {
+                    // Loop over Ljk entries in row j
+                    for (int k = R_r_start; (k < R_r_end && R_cols[k] < i); k++)
+                    {
+                        sum_jj += pow(R_values[k], 2);
+                    }
+
+                    // Access jj value in A
+                    T A_jj;
+                    int diag;
+                    for (diag = r_start; diag < r_end; diag++)
+                    {
+                        if (col_index[diag] == i)
+                        {
+                            A_jj = this->values[diag];
+                        }
+                    }
+
+                    // Ljj = sqrt(Ajj - sum(Ljk[:j]^2)
+                    R_values.push_back(sqrt(A_jj - sum_jj));
+                }
+            }
         }
     }
 
-    CSRMatrix<T> R = CSRMatrix<T>(this->rows, this->cols, R_values.size(), true);
+    CSRMatrix<T> result = CSRMatrix<T>(this->rows, this->cols, R_values.size(), true);
 
     for (int i = 0; i < R_values.size(); i++)
     {
-        R.col_index[i] = R_cols[i];
-        R.values[i] = R_values[i];
+        result.col_index[i] = R_cols[i];
+        result.values[i] = R_values[i];
     }
     for (int i = 0; i <= this->rows; i++)
     {
-        R.row_position[i] = R_row_position[i];
+        result.row_position[i] = R_row_position[i];
     }
 
-    return R;
+    return result;
 }
