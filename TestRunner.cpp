@@ -27,15 +27,12 @@ void TestRunner::test(bool (*fun_ptr)(), std::string title)
     if (outcome)
     {
         this->testsSucceeded += 1;
-        std::cout << GREEN << "\xE2\x9C\x93"
-                  << " Passed" << RESET << std::endl;
+        std::cout << GREEN << "Passed" << RESET << std::endl;
     }
     else
     {
         this->testsFailed += 1;
-        std::cout
-            << RED << "\u2717"
-            << " Failed" << RESET << std::endl;
+        std::cout << RED << "Failed" << RESET << std::endl;
     }
 }
 
@@ -45,17 +42,12 @@ void TestRunner::completeRun()
     std::cout << std::endl;
     if (this->testsFailed == 0)
     {
-        std::cout
-            << GREEN << "\xE2\x9C\x93"
-            << " "
-            << total << "/" << total << " tests passed." << RESET << std::endl;
+        std::cout << GREEN << total << "/" << total << " tests passed." << RESET << std::endl;
     }
     else
     {
-        std::cout
-            << RED
-            << " " << this->testsFailed << "/" << total << " tests failed." << RESET << std::endl
-            << std::endl;
+        std::cout << RED << " " << this->testsFailed << "/" << total << " tests failed." << RESET << std::endl
+                  << std::endl;
     }
 }
 
