@@ -22,7 +22,7 @@ Solver<T>::Solver(Matrix<T> &A, std::vector<T> &b) : A(A), b(b)
 
 // Constructor - creates a random matrix
 template <class T>
-Solver<T>::Solver<T>(int size) : size(size)
+Solver<T>::Solver(int size) : size(size)
 {
     // retuns a pointer that needs to be deleted
     // create random diagonally dominant matrices
@@ -50,8 +50,8 @@ Solver<T>::Solver<T>(int size) : size(size)
 template <class T>
 Solver<T>::Solver(const Solver<T> &S2)
 {
-    A = S2.A; // Assignment operator overloaded for Matrix to deepcopy
-    std::vector<T> btemp = S2.b;  // vector comes with copy constructor
+    A = S2.A;                    // Assignment operator overloaded for Matrix to deepcopy
+    std::vector<T> btemp = S2.b; // vector comes with copy constructor
     b = btemp;
 }
 
