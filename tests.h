@@ -1,6 +1,6 @@
 #include <iostream>
 #include <math.h>
-#include <ctime>
+#include <chrono>
 #include <vector>
 #include <memory>
 #include "Matrix.h"
@@ -118,19 +118,19 @@ bool test_dense_jacobi_and_gauss_seidl()
     std::vector<double> x_j(size, 0);
     std::vector<double> x_gs(size, 0);
 
-    clock_t t = clock();
+    auto t1 = std::chrono::high_resolution_clock::now();
     dense_solver.stationaryIterative(x_j, tol, it_max, false);
-    t = clock() - t;
+    auto t2 = std::chrono::high_resolution_clock::now();
 
-    std::cout << "Time taken for Jacobi: " << ((float)t) / CLOCKS_PER_SEC << std::endl
-              << std::endl;
+    auto duration = std::chrono::duration<double>(t2 - t1).count();
+    std::cout << "Time taken for Jacobi: " << duration << " s " << std::endl << std::endl;
 
-    t = clock();
+    t1 = std::chrono::high_resolution_clock::now();
     dense_solver.stationaryIterative(x_gs, tol, it_max, true);
-    t = clock() - t;
+    t2 = std::chrono::high_resolution_clock::now();
 
-    std::cout << "Time taken for Gauss Seidel: " << ((float)t) / CLOCKS_PER_SEC << std::endl
-              << std::endl;
+    duration = std::chrono::duration<double>(t2 - t1).count();
+    std::cout << "Time taken for Gauss Seidel: " << duration << " s " << std::endl << std::endl;
 
     std::vector<double> b_estimate(size, 0);
 
@@ -165,14 +165,12 @@ bool test_sparse_jacobi()
     CSRMatrix<double> sparse_matrix = CSRMatrix<double>(size, size, nnzs, init_sparse_values, init_row_position, init_col_index);
     SparseSolver<double> sparse_solver = SparseSolver<double>(sparse_matrix, b);
 
-    clock_t t = clock();
-
+    auto t1 = std::chrono::high_resolution_clock::now();
     sparse_solver.stationaryIterative(x, tol, it_max, false);
+    auto t2 = std::chrono::high_resolution_clock::now();
 
-    t = clock() - t;
-
-    std::cout << "Time taken for sparse Jacobi: " << ((float)t) / CLOCKS_PER_SEC << std::endl
-              << std::endl;
+    auto duration = std::chrono::duration<double>(t2 - t1).count();
+    std::cout << "Time taken for sparse Jacobi: " << duration << " s " << std::endl << std::endl;
 
     std::vector<double> b_estimate(size, 0);
 
@@ -202,14 +200,12 @@ bool test_sparse_CG()
     CSRMatrix<double> sparse_matrix = CSRMatrix<double>(size, size, nnzs, init_sparse_values, init_row_position, init_col_index);
     SparseSolver<double> sparse_solver = SparseSolver<double>(sparse_matrix, b);
 
-    clock_t t = clock();
-
+    auto t1 = std::chrono::high_resolution_clock::now();
     sparse_solver.conjugateGradient(x, tol, it_max);
-
-    t = clock() - t;
-
-    std::cout << "Time taken for sparse conjugate gradient solver: " << ((float)t) / CLOCKS_PER_SEC << std::endl
-              << std::endl;
+    auto t2 = std::chrono::high_resolution_clock::now();
+    
+    auto duration = std::chrono::duration<double>(t2 - t1).count();
+    std::cout << "Time taken for sparse conjugate gradient solver: " << duration << " s " << std::endl << std::endl;
 
     std::vector<double> b_estimate(size, 0);
 
@@ -226,6 +222,7 @@ bool test_lu_dense()
 {
     int size = 4;
     std::vector<double> x(size, 0);
+    std::vector<double> b_estimate(size, 0);
 
     std::shared_ptr<double[]> init_dense_values(new double[size * size]
     {10., 2., 3., 5., 1., 14., 6., 2., -1., 4., 16., -4, 5., 4., 3., 11.});
@@ -237,14 +234,13 @@ bool test_lu_dense()
 
     Matrix<double> LU(size, size, true);
 
-    clock_t t = clock();
+    auto t1 = std::chrono::high_resolution_clock::now();
     std::vector<int> piv = dense_solver.lu_decomp(LU);
     dense_solver.lu_solve(LU, piv, x);
-    t = clock() - t;
+    auto t2 = std::chrono::high_resolution_clock::now();
 
-    std::vector<double> b_estimate(size, 0);
-
-    std::cout << "Time taken for LU: " << ((float)t) / CLOCKS_PER_SEC << std::endl;
+    auto duration = std::chrono::duration<double>(t2 - t1).count();
+    std::cout << "Time taken for LU: " << duration << " s " << std::endl << std::endl;
 
     if (dense_solver.residualCalc(x, b_estimate) > 1e-6)
     {
@@ -257,21 +253,21 @@ bool test_lu_dense()
 
 bool test_lu_dense_random()
 {
-    int size = 1000;
+    int size = 100;
     std::vector<double> x(size, 0);
+    std::vector<double> b_estimate(size, 0);
 
     auto solver = Solver<double>(size);
 
     Matrix<double> LU(size, size, true);
 
-    clock_t t = clock();
+    auto t1 = std::chrono::high_resolution_clock::now();
     std::vector<int> piv = solver.lu_decomp(LU);
     solver.lu_solve(LU, piv, x);
-    t = clock() - t;
+    auto t2 = std::chrono::high_resolution_clock::now();
 
-    std::vector<double> b_estimate(size, 0);
-
-    std::cout << "Time taken for LU: " << ((float)t) / CLOCKS_PER_SEC << std::endl;
+    auto duration = std::chrono::duration<double>(t2 - t1).count();
+    std::cout << "Time taken for LU: " << duration << " s " << std::endl << std::endl;
 
     if (solver.residualCalc(x, b_estimate) > 1e-6)
     {
@@ -286,13 +282,13 @@ void run_tests()
 {
     TestRunner test_runner = TestRunner();
 
-    //test_runner.test(&test_check_dimensions_matching, "checkDimensions for matching matrices.");
-    //test_runner.test(&test_check_dimensions_not_matching, "checkDimensions for non-matching matrices.");
-    //test_runner.test(&test_sparse_matmatmult_4x4, "sparse matMatMult for two sparse 4x4 matrices.");
-    //test_runner.test(&test_sparse_matmatmult_5x5, "sparse matMatMult for multiplying a 5x5 sparse matrix by itself.");
-    //test_runner.test(&test_dense_jacobi_and_gauss_seidl, "stationaryIterative: dense Jacobi and Gauss-Seidel solver for 4x4 matrix.");
-    //test_runner.test(&test_lu_dense, "dense LU solver for 4x4 matrix.");
-    //test_runner.test(&test_sparse_jacobi, "sparse Jacobi solver for 4x4 matrix.");
-    //test_runner.test(&test_sparse_CG, "sparse conjugate gradient solver for 4x4 matrix.");
+    test_runner.test(&test_check_dimensions_matching, "checkDimensions for matching matrices.");
+    test_runner.test(&test_check_dimensions_not_matching, "checkDimensions for non-matching matrices.");
+    test_runner.test(&test_sparse_matmatmult_4x4, "sparse matMatMult for two sparse 4x4 matrices.");
+    test_runner.test(&test_sparse_matmatmult_5x5, "sparse matMatMult for multiplying a 5x5 sparse matrix by itself.");
+    test_runner.test(&test_dense_jacobi_and_gauss_seidl, "stationaryIterative: dense Jacobi and Gauss-Seidel solver for 4x4 matrix.");
+    test_runner.test(&test_lu_dense, "dense LU solver for 4x4 matrix.");
+    test_runner.test(&test_sparse_jacobi, "sparse Jacobi solver for 4x4 matrix.");
+    test_runner.test(&test_sparse_CG, "sparse conjugate gradient solver for 4x4 matrix.");
     test_runner.test(&test_lu_dense_random, "dense LU with random matrices.");
 }
