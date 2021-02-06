@@ -239,3 +239,93 @@ std::shared_ptr<CSRMatrix<T>> CSRMatrix<T>::matMatMult(CSRMatrix<T> &mat_right)
     }
     return result;
 }
+
+template <class T>
+CSRMatrix<T> CSRMatrix<T>::cholesky()
+{
+    // for now, we assume output has been preallocated
+    std::vector<T> R_values{};
+    std::vector<int> R_cols{};
+    std::vector<int> R_row_position(this->rows + 1, 0);
+
+    /*
+    Rjj = sqrt(Ajj - sum(Rjk[:j]^2)
+
+    Rij = sqrt(Aij - sum(Rik[:j]*Rjk[:j]^2); for i>j
+    */
+
+    // loop over rows of A
+    for (int i = 0; i < this->rows; i++)
+    {
+        // rows indices of left matrix
+        int r_start = row_position[i];
+        int r_end = row_position[i + 1];
+
+        // loop over column indices for this row in A - equivalent to rows in B
+        std::vector<int> cols_nnzs{};
+        // cii - index of col_index of R array
+        int ci = 0;
+        std::vector<int> infills_left{};
+        for (int cii = r_start; (cii < r_end && ci < i); cii++)
+        {
+            ci = col_index[cii];
+
+            // std::cout << "No. of items in row: " << cols_nnzs.size() << std::endl;
+            // std::cout << "row: " << i << std::endl;
+            // std::cout << "column: " << ci << std::endl;
+            for (int k = 0; k < ci; k++)
+            {
+                // std::cout << "columns left: " << k << std::endl;
+                if (cii != r_start && k == col_index[cii - 1])
+                {
+                    infills_left.push_back(col_index[cii - 1]);
+                }
+                for (int r = 0; r < k && k > 0; r++)
+                {
+                    int r_start_above = row_position[r];
+                    int r_end_above = row_position[r + 1];
+                    // std::cout << "rows above: " << r << std::endl;
+                    for (int a = r_start_above; a < r_end_above; a++)
+                    {
+                        if (infills_left.size() > 0 && col_index[a] == k)
+                        {
+
+                            cols_nnzs.push_back(k);
+                            // std::cout << "No. of items in row: " << cols_nnzs.size() << std::endl;
+                        }
+                    }
+                }
+            }
+            if (ci < i)
+            {
+                cols_nnzs.push_back(ci);
+            }
+
+            // std::cout << "No. of items in row: " << cols_nnzs.size() << std::endl;
+        }
+        cols_nnzs.push_back(i);
+
+        R_row_position[i + 1] = R_row_position[i] + cols_nnzs.size();
+
+        // Concatenate
+        for (int j = 0; j < cols_nnzs.size(); j++)
+        {
+            R_cols.push_back(cols_nnzs[j]);
+            R_values.push_back(1);
+        }
+    }
+
+    CSRMatrix<T> R = CSRMatrix<T>(this->rows, this->cols, R_values.size(), true);
+
+    for (int i = 0; i < R_values.size(); i++)
+    {
+        R.col_index[i] = R_cols[i];
+        R.values[i] = R_values[i];
+    }
+    for (int i = 0; i <= this->rows; i++)
+    {
+        R.row_position[i] = R_row_position[i];
+    }
+
+    return R;
+}
