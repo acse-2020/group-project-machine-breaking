@@ -12,14 +12,15 @@ public:
 
     // constructor where we want to preallocate ourselves
     Matrix(int rows, int cols, bool preallocate);
-    
+
     // constructor where we already have allocated memory outside
     Matrix(int rows, int cols, std::shared_ptr<T[]> &values_ptr);
 
     // Copy constructor
     Matrix(const Matrix<T> &M2);
-
-    Matrix<T>& operator=(const Matrix<T>& M2);
+    
+    // Overload assignment operator to deepcopy
+    Matrix<T> &operator=(const Matrix<T> &M2);
 
     // destructor
     virtual ~Matrix();
