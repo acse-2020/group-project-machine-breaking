@@ -19,7 +19,7 @@ public:
     // Copy constructor
     Matrix(const Matrix<T> &M2);
 
-    Matrix<T>& Matrix<T>::operator=(const Matrix<T>& M2);
+    Matrix<T> &operator=(const Matrix<T> &M2);
 
     // destructor
     virtual ~Matrix();
