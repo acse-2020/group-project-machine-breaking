@@ -173,6 +173,8 @@ bool test_sparse_jacobi()
     std::cout << "Time taken for sparse Jacobi: " << duration << " s " << std::endl << std::endl;
 
     std::vector<double> b_estimate(size, 0);
+    
+    printVector(x);
 
     if (sparse_solver.residualCalc(x, b_estimate) > 1e-6)
     {
@@ -274,14 +276,12 @@ bool test_lu_dense_random()
          TestRunner::testError("LU residual is above 1e-6");
          return false;
     }
-
     return true;
 }
 
 void run_tests()
 {
     TestRunner test_runner = TestRunner();
-
     test_runner.test(&test_check_dimensions_matching, "checkDimensions for matching matrices.");
     test_runner.test(&test_check_dimensions_not_matching, "checkDimensions for non-matching matrices.");
     test_runner.test(&test_sparse_matmatmult_4x4, "sparse matMatMult for two sparse 4x4 matrices.");
@@ -290,5 +290,5 @@ void run_tests()
     test_runner.test(&test_lu_dense, "dense LU solver for 4x4 matrix.");
     test_runner.test(&test_sparse_jacobi, "sparse Jacobi solver for 4x4 matrix.");
     test_runner.test(&test_sparse_CG, "sparse conjugate gradient solver for 4x4 matrix.");
-    test_runner.test(&test_lu_dense_random, "dense LU with random matrices.");
+    test_runner.test(&test_lu_dense_random, "dense LU with random matrix of size 100x100.");
 }
