@@ -20,7 +20,7 @@ public:
     void matVecMult(std::vector<T> &input, std::vector<T> &output);
 
     std::shared_ptr<CSRMatrix<T>> matMatMult(CSRMatrix<T> &mat_right);
-    void matMatMultSymbolic(const CSRMatrix<T> &mat_right, std::vector<int> &row_pos, std::vector<int> &col_ind);
+    std::shared_ptr<CSRMatrix<T>> matMatMultSymbolic(const CSRMatrix<T> &mat_right);
 
     std::shared_ptr<int[]> row_position; //create nullpointer
     std::shared_ptr<int[]> col_index;    // create nullpointer

@@ -311,23 +311,20 @@ bool test_sparse_lu()
     int size = 6;
     int nnzs = 12;
 
-    int init_row_position[] = {0, 4, 5, 7, 9, 11, 12};
-    int init_col_index[] = {0, 2, 3, 4, 1, 0, 2, 0, 3, 0, 4, 5};
-    double init_sparse_values[] = {5., 1., 1., 1., 5., 1., 5., 1., 5., 1., 5., 5.};
+    std::shared_ptr<double[]> init_sparse_values(new double[size * size]{5., 1., 1., 1., 5., 1., 5., 1., 5., 1., 5., 5.});
+    std::shared_ptr<int[]> init_row_position(new int[size * size]{0, 4, 5, 7, 9, 11, 12});
+    std::shared_ptr<int[]> init_col_index(new int[size * size]{0, 2, 3, 4, 1, 0, 2, 0, 3, 0, 4, 5});
 
     std::vector<double> b = {17., 10., 16., 21., 26., 30.};
     std::vector<int> perm = {0, 1, 2, 3, 4, 5};
 
-    CSRMatrix<double> sparse_matrix = CSRMatrix<double>(size, size, nnzs, &init_sparse_values[0], &init_row_position[0], &init_col_index[0]);
-    CSRMatrix<double> LU = CSRMatrix<double>(size, size, nnzs, &init_sparse_values[0], &init_row_position[0], &init_col_index[0]);
+    CSRMatrix<double> sparse_matrix = CSRMatrix<double>(size, size, nnzs, init_sparse_values, init_row_position, init_col_index);
+    // CSRMatrix<double> LU = CSRMatrix<double>(size, size, nnzs, init_sparse_values, init_row_position, init_col_index);
     SparseSolver<double> sparse_solver = SparseSolver<double>(sparse_matrix, b);
     std::vector<double> x(size, 0);
 
-    clock_t t = clock();
-
-    std::shared_ptr<CSRMatrix<double>> new_ptr = sparse_solver.lu_decomp(LU);
-    sparse_solver.lu_solve(*new_ptr, perm, x);
-    t = clock() - t;
+    std::shared_ptr<CSRMatrix<double>> LU = sparse_solver.lu_decomp();
+    sparse_solver.lu_solve(*LU, perm, x);
 
     double expected[] = {1, 2, 3, 4, 5, 6};
 

@@ -194,7 +194,7 @@ void SparseSolver<T>::conjugateGradient(std::vector<T> &x, double &tol, int &it_
 
 // LU decomposition
 template <class T>
-std::shared_ptr<CSRMatrix<T>> SparseSolver<T>::lu_decomp(CSRMatrix<T> &LU)
+std::shared_ptr<CSRMatrix<T>> SparseSolver<T>::lu_decomp()
 /*
 LU decomposition
 Algorithm based on similar method as in 'Numerical recipes C++'.
@@ -220,11 +220,11 @@ number of non-zero elements.
     for (i = 0; i < n; i++)
     {
         max = 0.0;
-        row_start = LU.row_position[i];
-        row_len = LU.row_position[i + 1] - row_start;
+        row_start = A.row_position[i];
+        row_len = A.row_position[i + 1] - row_start;
         for (j = 0; j < row_len; j++)
         {
-            temp = abs(LU.values[row_start + j]);
+            temp = abs(A.values[row_start + j]);
             if (temp > max)
                 max = temp;
         }
@@ -236,28 +236,24 @@ number of non-zero elements.
 
     bool matching = false;
 
-    // copy row col indexes into array
-    std::vector<int> row_pos_before(A.row_position, A.row_position + (A.rows + 1));
-    std::vector<int> col_ind_before(A.col_index, A.col_index + A.nnzs);
-
+    CSRMatrix<T> matrix_before = A;
+    std::shared_ptr<CSRMatrix<T>> LU;
     while (!matching)
     {
-        std::vector<int> row_pos_sym{};
-        std::vector<int> col_ind_sym{};
-        A.matMatMultSymbolic(A, row_pos_sym, col_ind_sym);
+        LU = matrix_before.matMatMultSymbolic(matrix_before);
 
-        if ((row_pos_sym.size() != row_pos_before.size()) || (col_ind_sym.size() != col_ind_before.size()))
+        if (matrix_before.nnzs != LU->nnzs || matrix_before.rows != LU->rows)
         {
-            row_pos_before = row_pos_sym;
-            col_ind_before = col_ind_sym;
+            // If they are not the same size
+            matrix_before = *LU;
             continue;
         }
 
         bool allSame = true;
 
-        for (int i = 0; i < row_pos_sym.size(); i++)
+        for (int i = 0; i < LU->rows; i++)
         {
-            if (row_pos_sym[i] != row_pos_before[i])
+            if (matrix_before.row_position[i] != LU->row_position[i])
             {
                 allSame = false;
                 break;
@@ -266,14 +262,13 @@ number of non-zero elements.
 
         if (!allSame)
         {
-            row_pos_before = row_pos_sym;
-            col_ind_before = col_ind_sym;
+            matrix_before = *LU;
             continue;
         }
 
-        for (int i = 0; i < col_ind_sym.size(); i++)
+        for (int i = 0; i < LU->nnzs; i++)
         {
-            if (col_ind_before[i] != col_ind_sym[i])
+            if (matrix_before.col_index[i] != LU->col_index[i])
             {
                 allSame = false;
                 break;
@@ -282,31 +277,45 @@ number of non-zero elements.
 
         if (!allSame)
         {
-            row_pos_before = row_pos_sym;
-            col_ind_before = col_ind_sym;
+            matrix_before = *LU;
             continue;
         }
 
         matching = true;
     }
 
-    // the lower and upper triangular matrix values are stored in the LU_vals vector
-    // corresponding row positions & col indices are in row_pos_before and col_ind_before
-    std::vector<T> LU_vals{};
+    std::cout << "BEFORE " << std::endl;
+    for (int i = 0; i < 7; i++)
+    {
+        std::cout << LU->row_position[i] << " ";
+    }
+    std::cout << std::endl;
 
-    // loop over rows of LU_vals
-    for (int row = 0; row < A.rows; row++)
+    for (int i = 0; i < LU->nnzs; i++)
+    {
+        std::cout << LU->col_index[i] << " ";
+    }
+    std::cout << std::endl;
+    for (int i = 0; i < LU->nnzs; i++)
+    {
+        std::cout << LU->values[i] << " ";
+    }
+    std::cout << std::endl;
+
+    // the lower and upper triangular matrix values are stored in the LU matrix
+    // loop over rows of LU
+    for (int row = 0; row < LU->rows; row++)
     {
         // loop over non-zero columns in that row
-        for (int cii = row_pos_before[row]; cii < row_pos_before[row + 1]; cii++)
+        for (int cii = LU->row_position[row]; cii < LU->row_position[row + 1]; cii++)
         {
             // col index of a non-zero
-            int col = col_ind_before[cii];
+            int col = LU->col_index[cii];
 
             // first element is simply equal to A_00
             if (col == 0 && row == 0)
             {
-                LU_vals.push_back(A.values[0]);
+                LU->values[0] = A.values[0];
                 continue;
             }
 
@@ -327,10 +336,10 @@ number of non-zero elements.
             // sum over alpha_ik * beta_kj
             // look for values in same row first, if they exist check for col equivalents
             T valsum = 0.0;
-            for (int col_vec_ind = row_pos_before[row]; col_vec_ind < row_pos_before[row + 1]; col_vec_ind++)
+            for (int col_vec_ind = LU->row_position[row]; col_vec_ind < LU->row_position[row + 1]; col_vec_ind++)
             {
                 // check on this row, preceding the current value
-                int k = col_ind_before[col_vec_ind];
+                int k = LU->col_index[col_vec_ind];
 
                 // if k is above cutoff, break the loop
                 if (k > cutoff)
@@ -339,14 +348,14 @@ number of non-zero elements.
                 }
 
                 // if alpha_ik is non-zero
-                if (LU_vals[col_vec_ind])
+                if (LU->values[col_vec_ind])
                 {
                     // check whether corresponding beta_kj also exists -> add to valsum
-                    for (int tempcols = row_pos_before[k]; tempcols < row_pos_before[k + 1]; tempcols++)
+                    for (int tempcols = LU->row_position[k]; tempcols < LU->row_position[k + 1]; tempcols++)
                     {
-                        if (col_ind_before[tempcols] == col)
+                        if (LU->col_index[tempcols] == col)
                         {
-                            valsum += (LU_vals[col_vec_ind] * LU_vals[tempcols]);
+                            valsum += (LU->values[col_vec_ind] * LU->values[tempcols]);
                         }
                     }
                 }
@@ -355,7 +364,7 @@ number of non-zero elements.
             if (col >= row)
             {
                 // this means that we are in the upper triangle or the diagonal (U)
-                LU_vals.push_back(a_ij - valsum);
+                LU->values[row * LU->cols + col] = a_ij - valsum;
             }
             else if (col < row)
             {
@@ -363,12 +372,12 @@ number of non-zero elements.
                 // we need the beta value from the LU_jj above
                 T b_jj = 0.0;
 
-                for (int LU_vals_index = row_pos_before[col]; LU_vals_index < row_pos_before[col + 1]; LU_vals_index++)
+                for (int LU_vals_index = LU->row_position[col]; LU_vals_index < LU->row_position[col + 1]; LU_vals_index++)
                 {
-                    int temp_col_ind = col_ind_before[LU_vals_index];
+                    int temp_col_ind = LU->col_index[LU_vals_index];
                     if (temp_col_ind == col)
                     {
-                        b_jj = LU_vals[LU_vals_index];
+                        b_jj = LU->values[LU_vals_index];
                         break;
                     }
                 }
@@ -378,23 +387,30 @@ number of non-zero elements.
                     std::cout << "Error: b_jj is zero" << std::endl;
                 }
 
-                LU_vals.push_back((1.0 / b_jj) * (a_ij - valsum));
+                LU->values[row * LU->cols + col] = (1.0 / b_jj) * (a_ij - valsum);
             }
         }
     }
 
-    std::shared_ptr<CSRMatrix<T>> sparse_mat_ptr(new CSRMatrix<T>(A.rows, A.cols, LU_vals.size(), true));
+    std::cout << "END " << std::endl;
+    for (int i = 0; i < 7; i++)
+    {
+        std::cout << LU->row_position[i] << " ";
+    }
+    std::cout << std::endl;
 
-    for (int i = 0; i < LU_vals.size(); i++)
+    for (int i = 0; i < LU->nnzs; i++)
     {
-        sparse_mat_ptr->values[i] = LU_vals[i];
-        sparse_mat_ptr->col_index[i] = col_ind_before[i];
+        std::cout << LU->col_index[i] << " ";
     }
-    for (int i = 0; i <= A.rows; i++)
+    std::cout << std::endl;
+    for (int i = 0; i < LU->nnzs; i++)
     {
-        sparse_mat_ptr->row_position[i] = row_pos_before[i];
+        std::cout << LU->values[i] << " ";
     }
-    return sparse_mat_ptr;
+    std::cout << std::endl;
+
+    return LU;
 }
 
 // Linear solver that uses LU decomposition

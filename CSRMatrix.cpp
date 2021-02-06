@@ -104,17 +104,20 @@ void CSRMatrix<T>::matVecMult(std::vector<T> &input, std::vector<T> &output)
 
 // populate the row_pos and col_ind vectors
 template <class T>
-void CSRMatrix<T>::matMatMultSymbolic(const CSRMatrix<T> &mat_right, std::vector<int> &row_pos, std::vector<int> &col_ind)
+std::shared_ptr<CSRMatrix<T>> CSRMatrix<T>::matMatMultSymbolic(const CSRMatrix<T> &mat_right)
 {
-    row_pos.reserve(this->rows + 1);
-    row_pos.push_back(0);
+    std::vector<int> col_ind{};
+    std::shared_ptr<int[]> row_pos(new int[this->rows + 1]{});
+    //    row_pos.reserve(this->rows + 1);
+    // row_pos.push_back(0);
+    row_pos[0] = 0;
 
     // loop over rows of A
     for (int i = 0; i < this->rows; i++)
     {
         // rows indices of left matrix
-        int r_start = row_position[i];
-        int r_end = row_position[i + 1];
+        int r_start = this->row_position[i];
+        int r_end = this->row_position[i + 1];
 
         // loop over column indices for this row in A - equivalent to rows in B
         std::vector<int> cols_nnzs{};
@@ -139,7 +142,7 @@ void CSRMatrix<T>::matMatMultSymbolic(const CSRMatrix<T> &mat_right, std::vector
 
         int nnzs_per_row = cols_nnzs.size();
 
-        row_pos.push_back(row_pos[i] + nnzs_per_row);
+        row_pos[i + 1] = row_pos[i] + nnzs_per_row;
 
         // Concatenate
         for (int j = 0; j < nnzs_per_row; j++)
@@ -147,6 +150,20 @@ void CSRMatrix<T>::matMatMultSymbolic(const CSRMatrix<T> &mat_right, std::vector
             col_ind.push_back(cols_nnzs[j]);
         }
     }
+
+    int new_nnzs = col_ind.size();
+    std::shared_ptr<int[]> col_ind_ptr(new int[new_nnzs]{});
+    std::shared_ptr<T[]> values_ptr(new T[new_nnzs]{});
+
+    for (int i = 0; i < new_nnzs; i++)
+    {
+        col_ind_ptr[i] = col_ind[i];
+        values_ptr[i] = 0;
+    }
+
+    std::shared_ptr<CSRMatrix<T>> result(new CSRMatrix<T>(this->rows, mat_right.cols, new_nnzs, values_ptr, row_pos, col_ind_ptr));
+
+    return result;
 }
 
 template <class T>
