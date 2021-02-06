@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <vector>
 #include <memory>
+#include <random>
 #include "utilities.h"
 
 // Constructor
@@ -16,6 +17,32 @@ Solver<T>::Solver(Matrix<T> &A, std::vector<T> &b) : A(A), b(b)
     {
         std::cerr << "Input dimensions for matrices don't match" << std::endl;
         return;
+    }
+}
+
+// Constructor - creates a random matrix
+template <class T>
+Solver<T>::Solver(int size) : size(size)
+{
+    // retuns a pointer that needs to be deleted
+    // create random diagonally dominant matrices
+    A = Matrix<T>(size, size, true);
+    b.reserve(size);
+
+    for (int i = 0; i < size; i++)
+    {
+        b.push_back(T(rand() % 10 + 1));
+        for (int j = 0; j < size; j++)
+        {
+            if (i == j)
+            {
+                A.values[i * size + j] = T(rand() % 10 + 10);
+            }
+            else
+            {
+                A.values[i * size + j] = T(rand() % 10);
+            }
+        }
     }
 }
 
@@ -32,33 +59,6 @@ Solver<T>::Solver(const Solver<T> &S2)
 template <class T>
 Solver<T>::~Solver()
 {
-}
-
-template <class T>
-Solver<T> Solver<T>::makeSolver(int size)
-{
-    // retuns a pointer that needs to be deleted
-    // create random diagonally dominant matrices
-    auto m = Matrix<double>(size, size, true);
-
-    for (int i = 0; i < size; i++)
-    {
-        for (int j = 0; j < size; j++)
-        {
-            if (i == j)
-            {
-                m.values[i * size + j] = double(rand() % 10 + 10);
-            }
-            else
-            {
-                m.values[i * size + j] = double(rand() % 10);
-            }
-        }
-    }
-
-    std::vector<double> b(4, 0);
-
-    return Solver<T>(m, b);
 }
 
 template <class T>
