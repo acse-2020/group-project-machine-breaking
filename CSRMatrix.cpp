@@ -102,6 +102,53 @@ void CSRMatrix<T>::matVecMult(std::vector<T> &input, std::vector<T> &output)
     }
 }
 
+// populate the row_pos and col_ind vectors
+template <class T>
+void CSRMatrix<T>::matMatMultSymbolic(const CSRMatrix<T> &mat_right, std::vector<int> &row_pos, std::vector<int> &col_ind)
+{
+    row_pos.reserve(this->rows + 1);
+    row_pos.push_back(0);
+
+    // loop over rows of A
+    for (int i = 0; i < this->rows; i++)
+    {
+        // rows indices of left matrix
+        int r_start = row_position[i];
+        int r_end = row_position[i + 1];
+
+        // loop over column indices for this row in A - equivalent to rows in B
+        std::vector<int> cols_nnzs{};
+
+        // cii - index of col_index of left array
+        for (int cii = r_start; cii < r_end; cii++)
+        {
+            int ci = col_index[cii];
+            // left col index corresponds to right row index
+            int row_right_start = mat_right.row_position[ci];
+            int row_right_end = mat_right.row_position[ci + 1];
+            for (int rr = row_right_start; rr < row_right_end; rr++)
+            {
+                // this is the column index of output that is nnz
+                // the corresponding row index is i
+                cols_nnzs.push_back(mat_right.col_index[rr]);
+            }
+        }
+        // sort non_zeros & remove duplicates
+        sort(cols_nnzs.begin(), cols_nnzs.end());
+        cols_nnzs.erase(unique(cols_nnzs.begin(), cols_nnzs.end()), cols_nnzs.end());
+
+        int nnzs_per_row = cols_nnzs.size();
+
+        row_pos.push_back(row_pos[i] + nnzs_per_row);
+
+        // Concatenate
+        for (int j = 0; j < nnzs_per_row; j++)
+        {
+            col_ind.push_back(cols_nnzs[j]);
+        }
+    }
+}
+
 template <class T>
 std::shared_ptr<CSRMatrix<T>> CSRMatrix<T>::matMatMult(CSRMatrix<T> &mat_right)
 {
@@ -167,12 +214,6 @@ std::shared_ptr<CSRMatrix<T>> CSRMatrix<T>::matMatMult(CSRMatrix<T> &mat_right)
             output_all_values.push_back(output_vals_per_row[j]);
         }
     }
-
-    //(int rows, int cols, int nnzs, T *values_ptr, int *row_pos, int *col_ind) : Matrix<T>(rows, cols, values_ptr), nnzs(nnzs), row_position(row_pos), col_index(col_ind)
-
-    int init_row_position[] = {0, 1, 2, 3, 4};
-    int init_col_index[] = {0, 1, 2, 3};
-    double init_sparse_values[] = {2, 1, 3, 7};
 
     std::shared_ptr<CSRMatrix<T>> result(new CSRMatrix<T>(this->rows, mat_right.cols, output_cols.size(), true));
 
