@@ -273,6 +273,7 @@ CSRMatrix<T> CSRMatrix<T>::cholesky()
             // std::cout << "No. of items in row: " << cols_nnzs.size() << std::endl;
             // std::cout << "row: " << i << std::endl;
             // std::cout << "column: " << ci << std::endl;
+
             for (int k = 0; k < ci; k++)
             {
                 // std::cout << "columns left: " << k << std::endl;
@@ -280,6 +281,7 @@ CSRMatrix<T> CSRMatrix<T>::cholesky()
                 {
                     infills_left.push_back(col_index[cii - 1]);
                 }
+
                 for (int r = 0; r < k && k > 0; r++)
                 {
                     int r_start_above = row_position[r];
@@ -304,6 +306,9 @@ CSRMatrix<T> CSRMatrix<T>::cholesky()
             // std::cout << "No. of items in row: " << cols_nnzs.size() << std::endl;
         }
         cols_nnzs.push_back(i);
+        // sort non_zeros & remove duplicates
+        sort(cols_nnzs.begin(), cols_nnzs.end());
+        cols_nnzs.erase(unique(cols_nnzs.begin(), cols_nnzs.end()), cols_nnzs.end());
 
         R_row_position[i + 1] = R_row_position[i] + cols_nnzs.size();
 
