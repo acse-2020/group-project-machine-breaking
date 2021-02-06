@@ -19,7 +19,7 @@ Matrix<T>::Matrix(int rows, int cols, bool preallocate) : rows(rows), cols(cols)
 // Constructor - now just setting the value of our pointer
 template <class T>
 //Matrix<T>::Matrix(int rows, int cols, T *values_ptr) : rows(rows), cols(cols), size_of_values(rows * cols), values(values_ptr)
-Matrix<T>::Matrix(int rows, int cols, std::shared_ptr<T[]> &values_ptr) : rows(rows), cols(cols), size_of_values(rows* cols), values(values_ptr)
+Matrix<T>::Matrix(int rows, int cols, std::shared_ptr<T[]> &values_ptr) : rows(rows), cols(cols), size_of_values(rows * cols), values(values_ptr)
 {
 }
 
@@ -46,7 +46,7 @@ Matrix<T>::Matrix(const Matrix<T> &M2)
 
 // Copy constructor - overloading the assignement operator
 template <class T>
-Matrix<T>& Matrix<T>::operator=(const Matrix<T>& M2)
+Matrix<T> &Matrix<T>::operator=(const Matrix<T> &M2)
 {
     // self-assignment check
     if (this == &M2)
@@ -62,7 +62,6 @@ Matrix<T>& Matrix<T>::operator=(const Matrix<T>& M2)
     preallocated = true;
     return *this;
 }
-
 
 // destructor
 template <class T>

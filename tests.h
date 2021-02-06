@@ -20,9 +20,9 @@ bool test_sparse_matmatmult_5x5()
     int nnzs = 14;
     int size = 5;
 
-    std::shared_ptr<int[]> init_row_position1(new int[size + 1] { 0, 2, 4, 7, 11, 14 });
-    std::shared_ptr<int[]> init_col_index1(new int[nnzs] { 0, 4, 0, 1, 1, 2, 3, 0, 2, 3, 4, 1, 3, 4 });
-    std::shared_ptr<double[]> init_sparse_values1(new double[nnzs] { 10, -2, 3, 9, 7, 8, 7, 3, 8, 7, 5, 8, 9, 13 });
+    std::shared_ptr<int[]> init_row_position1(new int[size + 1]{0, 2, 4, 7, 11, 14});
+    std::shared_ptr<int[]> init_col_index1(new int[nnzs]{0, 4, 0, 1, 1, 2, 3, 0, 2, 3, 4, 1, 3, 4});
+    std::shared_ptr<double[]> init_sparse_values1(new double[nnzs]{10, -2, 3, 9, 7, 8, 7, 3, 8, 7, 5, 8, 9, 13});
     CSRMatrix<double> sparse_matrix = CSRMatrix<double>(size, size, nnzs, init_sparse_values1, init_row_position1, init_col_index1);
 
     auto result = sparse_matrix.matMatMult(sparse_matrix);
@@ -44,22 +44,22 @@ bool test_sparse_matmatmult_4x4()
     int nnzs = 4;
     int size = 4;
 
-    std::shared_ptr<int[]> init_row_position1(new int[size + 1]{ 0, 2, 3, 4, 4 });
-    std::shared_ptr<int[]> init_col_index1(new int[nnzs]{ 1, 3, 0, 1 });
-    std::shared_ptr<double[]> init_sparse_values1(new double[nnzs]{ 1, 1, 1, 2 });
+    std::shared_ptr<int[]> init_row_position1(new int[size + 1]{0, 2, 3, 4, 4});
+    std::shared_ptr<int[]> init_col_index1(new int[nnzs]{1, 3, 0, 1});
+    std::shared_ptr<double[]> init_sparse_values1(new double[nnzs]{1, 1, 1, 2});
     CSRMatrix<double> sparse_matrix1 = CSRMatrix<double>(size, size, nnzs, init_sparse_values1, init_row_position1, init_col_index1);
 
-    std::shared_ptr<int[]> init_row_position2(new int[4 + 1] { 0, 0, 2, 3, 4 });
-    std::shared_ptr<int[]> init_col_index2(new int[nnzs] { 0, 2, 3, 2 });
-    std::shared_ptr<double[]> init_sparse_values2(new double[nnzs] { 1, 1, 2, 1 });
+    std::shared_ptr<int[]> init_row_position2(new int[4 + 1]{0, 0, 2, 3, 4});
+    std::shared_ptr<int[]> init_col_index2(new int[nnzs]{0, 2, 3, 2});
+    std::shared_ptr<double[]> init_sparse_values2(new double[nnzs]{1, 1, 2, 1});
     CSRMatrix<double> sparse_matrix2 = CSRMatrix<double>(4, 4, nnzs, init_sparse_values2, init_row_position2, init_col_index2);
 
     auto result = sparse_matrix1.matMatMult(sparse_matrix2);
 
     int expected_nnzs = 4;
-    double expected_values[] = { 1, 2, 2, 2 };
-    int expected_row_pos[] = { 0, 2, 2, 4, 4 };
-    int expected_col_ind[] = { 0, 2, 0, 2 };
+    double expected_values[] = {1, 2, 2, 2};
+    int expected_row_pos[] = {0, 2, 2, 4, 4};
+    int expected_col_ind[] = {0, 2, 0, 2};
 
     bool vals = TestRunner::assertArrays(&expected_values[0], &result->values[0], expected_nnzs);
     bool rows = TestRunner::assertArrays(&expected_row_pos[0], &result->row_position[0], expected_nnzs);
@@ -107,8 +107,7 @@ bool test_dense_jacobi_and_gauss_seidl()
     double tol = 1e-6;
     int it_max = 1000;
 
-    std::shared_ptr<double[]> init_dense_values(new double[size * size]
-    { 10., 2., 3., 5., 1., 14., 6., 2., -1., 4., 16., -4, 5., 4., 3., 11. });
+    std::shared_ptr<double[]> init_dense_values(new double[size * size]{10., 2., 3., 5., 1., 14., 6., 2., -1., 4., 16., -4, 5., 4., 3., 11.});
 
     Matrix<double> dense_mat = Matrix<double>(size, size, init_dense_values);
     std::vector<double> b = {1., 2., 3., 4.};
@@ -155,9 +154,9 @@ bool test_sparse_jacobi()
     int it_max = 1000;
     int nnzs = 4;
 
-    std::shared_ptr<int[]> init_row_position(new int[size + 1]{ 0, 1, 2, 3, 4 });
-    std::shared_ptr<int[]> init_col_index(new int[nnzs] {0, 1, 2, 3});
-    std::shared_ptr<double[]> init_sparse_values(new double[nnzs] { 2, 1, 3, 7 });
+    std::shared_ptr<int[]> init_row_position(new int[size + 1]{0, 1, 2, 3, 4});
+    std::shared_ptr<int[]> init_col_index(new int[nnzs]{0, 1, 2, 3});
+    std::shared_ptr<double[]> init_sparse_values(new double[nnzs]{2, 1, 3, 7});
 
     std::vector<double> b = {6.4, 7.8, 56.7, 51.1};
     std::vector<double> x(size, 0);
@@ -192,9 +191,9 @@ bool test_sparse_CG()
     int it_max = 1000;
     int nnzs = 4;
 
-    std::shared_ptr<int[]> init_row_position(new int[size + 1] {0, 1, 2, 3, 4});
+    std::shared_ptr<int[]> init_row_position(new int[size + 1]{0, 1, 2, 3, 4});
     std::shared_ptr<int[]> init_col_index(new int[nnzs]{0, 1, 2, 3});
-    std::shared_ptr<double[]> init_sparse_values(new double[nnzs]{ 2, 1, 3, 7 });
+    std::shared_ptr<double[]> init_sparse_values(new double[nnzs]{2, 1, 3, 7});
 
     std::vector<double> b = {6.4, 7.8, 56.7, 51.1};
     std::vector<double> x(size, 0);
@@ -227,8 +226,7 @@ bool test_lu_dense()
     int size = 4;
     std::vector<double> x(size, 0);
 
-    std::shared_ptr<double[]> init_dense_values(new double[size * size]
-    {10., 2., 3., 5., 1., 14., 6., 2., -1., 4., 16., -4, 5., 4., 3., 11.});
+    std::shared_ptr<double[]> init_dense_values(new double[size * size]{10., 2., 3., 5., 1., 14., 6., 2., -1., 4., 16., -4, 5., 4., 3., 11.});
 
     Matrix<double> dense_mat = Matrix<double>(size, size, init_dense_values);
     std::vector<double> b = {1., 2., 3., 4.};
@@ -264,7 +262,7 @@ bool test_lu_dense_random()
     //auto *solver = new Solver<double>::makeSolver(size);
 
     //double init_dense_values[] = { 10., 2., 3., 5., 1., 14., 6., 2., -1., 4., 16., -4, 5., 4., 3., 11. };
-    std::shared_ptr<double[]> init_dense_values(new double[size * size]{ 10., 2., 3., 5., 1., 14., 6., 2., -1., 4., 16., -4, 5., 4., 3., 11. });
+    std::shared_ptr<double[]> init_dense_values(new double[size * size]{10., 2., 3., 5., 1., 14., 6., 2., -1., 4., 16., -4, 5., 4., 3., 11.});
     //std::unique_ptr<double[]> init_dense_values(new double[size * size]);
     //(10., 2., 3., 5., 1., 14., 6., 2., -1., 4., 16., -4, 5., 4., 3., 11.);
     //init_dense_values = { 10., 2., 3., 5., 1., 14., 6., 2., -1., 4., 16., -4, 5., 4., 3., 11. };
@@ -274,7 +272,7 @@ bool test_lu_dense_random()
     //Matrix<double> copy_mat = dense_mat;
     std::cout << dense_mat.values[0] << " " << &dense_mat.values[0] << std::endl;
     //std::cout << copy_mat.values[0] << " " << &copy_mat.values[0] << std::endl;
-    std::vector<double> b = { 1., 2., 3., 4. };
+    std::vector<double> b = {1., 2., 3., 4.};
 
     Solver<double> dense_solver = Solver<double>(dense_mat, b);
     std::cout << dense_solver.A.values[0] << " " << &dense_solver.A.values[0] << std::endl;
