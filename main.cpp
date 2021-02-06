@@ -1,7 +1,7 @@
 #include <iostream>
 #include "tests.h"
 
-int main()
+void main()
 {
     //std::string answer;
     //std::cout << "Would you like to run tests? Type 'yes' or 'no' and hit enter." << std::endl;
