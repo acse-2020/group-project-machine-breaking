@@ -13,6 +13,7 @@
 #include "SparseSolver.cpp"
 #include "TestRunner.h"
 #include "utilities.h"
+#include <memory>
 
 // test functions should start with 'test_' prefix
 bool test_sparse_matmatmult_5x5()
@@ -303,6 +304,41 @@ bool test_lu_dense_random()
     //     TestRunner::testError("LU residual is above 1e-6");
     //     return false;
     // }
+}
+
+bool test_sparse_lu()
+{
+    int size = 6;
+    int nnzs = 12;
+
+    int init_row_position[] = {0, 4, 5, 7, 9, 11, 12};
+    int init_col_index[] = {0, 2, 3, 4, 1, 0, 2, 0, 3, 0, 4, 5};
+    double init_sparse_values[] = {5., 1., 1., 1., 5., 1., 5., 1., 5., 1., 5., 5.};
+
+    std::vector<double> b = {17., 10., 16., 21., 26., 30.};
+    std::vector<int> perm = {0, 1, 2, 3, 4, 5};
+
+    CSRMatrix<double> sparse_matrix = CSRMatrix<double>(size, size, nnzs, &init_sparse_values[0], &init_row_position[0], &init_col_index[0]);
+    CSRMatrix<double> LU = CSRMatrix<double>(size, size, nnzs, &init_sparse_values[0], &init_row_position[0], &init_col_index[0]);
+    SparseSolver<double> sparse_solver = SparseSolver<double>(sparse_matrix, b);
+    std::vector<double> x(size, 0);
+
+    clock_t t = clock();
+
+    std::shared_ptr<CSRMatrix<double>> new_ptr = sparse_solver.lu_decomp(LU);
+    sparse_solver.lu_solve(*new_ptr, perm, x);
+    t = clock() - t;
+
+    double expected[] = {1, 2, 3, 4, 5, 6};
+
+    for (int i = 0; i < size; i++)
+    {
+        if (expected[i] != x[i])
+        {
+            std::cout << expected[i] << " does not match " << x[i] << std::endl;
+            return false;
+        }
+    }
 
     return true;
 }
@@ -320,4 +356,5 @@ void run_tests()
     test_runner.test(&test_sparse_jacobi, "sparse Jacobi solver for 4x4 matrix.");
     test_runner.test(&test_sparse_CG, "sparse conjugate gradient solver for 4x4 matrix.");
     test_runner.test(&test_lu_dense_random, "dense LU with random matrices.");
+    test_runner.test(&test_sparse_lu, "sparse LU decomposition.");
 }
