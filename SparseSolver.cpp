@@ -22,7 +22,6 @@ SparseSolver<T>::~SparseSolver()
 {
 }
 
-// TODO: move this to utilities?
 template <class T>
 T SparseSolver<T>::residualCalc(std::vector<T> &x, std::vector<T> &b_estimate)
 {
@@ -42,17 +41,15 @@ T SparseSolver<T>::residualCalc(std::vector<T> &x, std::vector<T> &b_estimate)
 template <class T>
 void SparseSolver<T>::stationaryIterative(std::vector<T> &x, double &tol, int &it_max, bool isGaussSeidel)
 {
-    // TODO: check diagonal dominance
-    // TODO: add more comments
-
-    if (isGaussSeidel)
-    {
-        throw "Sparse Gauss-Seidel is not yet implemented.";
-    }
-
     double residual;
     std::vector<T> b_estimate(x.size(), 0);
-    std::vector<T> x_old(x.size(), 0);
+
+    // vector for storing previous iteration if necessary
+    std::vector<T> x_old;
+    if (isGaussSeidel == false)
+    {
+        x_old = std::vector<T>(x.size(), 0);
+    }
 
     // Check our dimensions match
     checkDimensions(A, b);
@@ -63,39 +60,38 @@ void SparseSolver<T>::stationaryIterative(std::vector<T> &x, double &tol, int &i
     {
         x[i] = 0;
     }
+    // loop up to a max number of iterations in case the solution doesn't converge
     int k;
     for (k = 0; k < it_max; k++)
     {
-        for (int i = 0; i < A.rows; i++)
+        // loop over rows
+        for (int r = 0; r < A.rows; r++)
         {
             // Initialise sums of aij * xj
-            double sum = 0;
-            double sum2 = 0;
+            T diagonal = 0;
+            T sum = 0;
+            // T sum2 = 0;
 
-            // loop over rows
-            for (int r = 0; r < A.rows; r++)
+            // loop over non-zero values in row r
+            for (int item_index = A.row_position[r]; item_index < A.row_position[r + 1]; item_index++)
             {
-                T diagonal = 0;
-                T sum = 0;
-                // T sum2 = 0;
-
-                // number of iterations == number of non-zero items in that row
-                for (int item_index = A.row_position[r]; item_index < A.row_position[r + 1]; item_index++)
+                int col_ind = A.col_index[item_index];
+                if (r == col_ind)
                 {
-                    int col_ind = A.col_index[item_index];
-                    if (col_ind == r)
-                    {
-                        // this is a diagonal element
-                        diagonal = A.values[item_index];
-                    }
-                    else
-                    {
-                        sum += A.values[item_index] * x_old[col_ind];
-                    }
+                    // this is a diagonal element
+                    diagonal = A.values[item_index];
                 }
-
-                x[r] = (1.0 / diagonal) * (b[r] - sum);
+                else if (!isGaussSeidel)
+                {
+                    sum += A.values[item_index] * x_old[col_ind];
+                }
+                else
+                {
+                    sum += A.values[item_index] * x[col_ind];
+                }
             }
+
+            x[r] = (1.0 / diagonal) * (b[r] - sum);
         }
 
         // Call residual calculation method
