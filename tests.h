@@ -491,9 +491,25 @@ bool test_sparse_lu()
     return true;
 }
 
+bool test_random_sparse_matrix()
+{
+    // 90 % of values should be 0
+    CSRMatrix<double> rand_sparse = CSRMatrix<double>(10, 0.8);
+
+    for (int i = 0; i < 100; i++)
+    {
+        std::cout << rand_sparse.values[i] << " ";
+    }
+    std::cout << std::endl;
+    if (rand_sparse.nnzs != 20)
+    {
+        return false;
+    }
+    return true;
+}
+
 void run_tests()
 {
-
     // MATRIX
     TestRunner test_runner_matrix = TestRunner("Matrix");
     test_runner_matrix.test(&test_mat_vec_mult, "matrix vector multiplication.");
@@ -502,6 +518,7 @@ void run_tests()
     TestRunner test_runner_csrmatrix = TestRunner("CSRMatrix");
     test_runner_csrmatrix.test(&test_sparse_matmatmult_4x4, "sparse matMatMult for two sparse 4x4 matrices.");
     test_runner_csrmatrix.test(&test_sparse_matmatmult_5x5, "sparse matMatMult for multiplying a 5x5 sparse matrix by itself.");
+    test_runner_csrmatrix.test(&test_random_sparse_matrix, "constructor to create a random sparse matrix.");
 
     // SOLVER
     TestRunner test_runner_solver = TestRunner("Solver");
@@ -522,5 +539,4 @@ void run_tests()
     // UTILITIES
     TestRunner test_runner_utils = TestRunner("Utilities");
     test_runner_utils.test(&test_check_dimensions_matching, "checkDimensions for matching matrices.");
-    test_runner_utils.test(&test_check_dimensions_not_matching, "checkDimensions for non-matching matrices.");
 }

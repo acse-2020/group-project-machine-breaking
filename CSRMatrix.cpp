@@ -1,6 +1,7 @@
 #include <iostream>
 #include "CSRMatrix.h"
 #include <algorithm>
+#include <cmath>
 
 // Default constructor - creates emmpty matrix
 template <class T>
@@ -79,6 +80,21 @@ CSRMatrix<T> &CSRMatrix<T>::operator=(const CSRMatrix<T> &M2)
     }
     this->preallocated = true;
     return *this;
+}
+
+template <class T>
+CSRMatrix<T>::CSRMatrix(int size, double sparsity)
+{
+    this->nnzs = std::round(size * size * (1.0 - sparsity));
+
+    // make sure this number is even since we want to create a symmetric matrix
+    const int offdiagonal = (nnzs - size) / 2 * 2;
+
+    std::cout << offdiagonal << std::endl;
+    for (int i = 0; i < size; i++)
+    {
+        // loop over all rows
+    }
 }
 
 template <class T>
