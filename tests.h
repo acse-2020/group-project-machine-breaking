@@ -182,8 +182,8 @@ bool test_dense_jacobi_and_gauss_seidl()
 
     std::vector<double> output_b(size, 0);
 
-    bool j_res = dense_solver.residualCalc(x_j, output_b);
-    bool gs_res = dense_solver.residualCalc(x_gs, output_b);
+    double j_res = dense_solver.residualCalc(x_j, output_b);
+    double gs_res = dense_solver.residualCalc(x_gs, output_b);
 
     // passes if residual for both is small enough
     return TestRunner::assertBelowTolerance(j_res, tol) && TestRunner::assertBelowTolerance(gs_res, tol);
