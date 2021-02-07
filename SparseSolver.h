@@ -17,7 +17,7 @@ public:
 
     void stationaryIterative(std::vector<T> &x, double &tol, int &it_max, bool isGaussSeidel);
 
-    double residualCalc(std::vector<T> &x, std::vector<T> &b_estimate);
+    T residualCalc(std::vector<T> &x, std::vector<T> &b_estimate);
 
     void conjugateGradient(std::vector<T> &x, double &tol, int &it_max);
 };
