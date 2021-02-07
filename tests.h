@@ -401,6 +401,22 @@ bool test_lu_dense_random()
     std::cout << "Time taken for LU: " << duration << " s " << std::endl
               << std::endl;
 
+    // use a second b array
+    std::vector<double> b_new(size, 0);
+    std::vector<double> x_new(size, 0);
+    for (int i = 0; i < size; i++)
+    {
+        b_new[i] = i + 1;
+    }
+
+    t1 = std::chrono::high_resolution_clock::now();
+    solver.lu_solve(LU, piv, x_new, b_new);
+    t2 = std::chrono::high_resolution_clock::now();
+
+    duration = std::chrono::duration<double>(t2 - t1).count();
+    std::cout << "Time taken for LU with second b: " << duration << " s " << std::endl
+              << std::endl;
+
     if (solver.residualCalc(x, output_b) > 1e-6)
     {
         TestRunner::testError("LU residual is above 1e-6");
