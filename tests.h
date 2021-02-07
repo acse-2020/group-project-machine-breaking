@@ -434,7 +434,9 @@ bool test_cholesky()
     SparseSolver<double> sparse_solver = SparseSolver<double>(sparse_matrix1, b);
 
     std::shared_ptr<CSRMatrix<double>> R = sparse_solver.cholesky_decomp();
+
     std::vector<double> x(size, 0);
+
     sparse_solver.cholesky_solve(*R, x);
 
     // R->printMatrix();
@@ -493,18 +495,40 @@ bool test_sparse_lu()
 
 bool test_random_sparse_matrix()
 {
-    // 90 % of values should be 0
-    CSRMatrix<double> rand_sparse = CSRMatrix<double>(10, 0.8);
+    int size = 10;
+    CSRMatrix<double> rand_sparse = CSRMatrix<double>(size, 0.4);
 
-    for (int i = 0; i < 100; i++)
+    if (rand_sparse.rows != size || rand_sparse.cols != size)
     {
-        std::cout << rand_sparse.values[i] << " ";
-    }
-    std::cout << std::endl;
-    if (rand_sparse.nnzs != 20)
-    {
+        TestRunner::testError("Dimensions of random matrix are incorrect");
         return false;
     }
+
+    // compare to transpose to see whether it is symmetric
+    std::shared_ptr<CSRMatrix<double>> transpose = rand_sparse.transpose();
+
+    for (int i = 0; i < size + 1; i++)
+    {
+        if (rand_sparse.row_position[i] != transpose->row_position[i])
+        {
+            TestRunner::testError("row_position of random matrix and its transpose do not match");
+            return false;
+        }
+    }
+    for (int i = 0; i < rand_sparse.nnzs; i++)
+    {
+        if (rand_sparse.col_index[i] != transpose->col_index[i])
+        {
+            TestRunner::testError("col_index of random matrix and its transpose do not match");
+            return false;
+        }
+        if (rand_sparse.values[i] != transpose->values[i])
+        {
+            TestRunner::testError("values of random matrix and its transpose do not match");
+            return false;
+        }
+    }
+
     return true;
 }
 

@@ -2,6 +2,9 @@
 #include "CSRMatrix.h"
 #include <algorithm>
 #include <cmath>
+#include <stdio.h>  /* printf, NULL */
+#include <stdlib.h> /* srand, rand */
+#include <time.h>
 
 // Default constructor - creates emmpty matrix
 template <class T>
@@ -87,39 +90,105 @@ template <class T>
 CSRMatrix<T>::CSRMatrix(int size, double sparsity)
 {
     // initialize random seed
-    srand (time(NULL));
+    srand(time(NULL));
 
-    std::shared_ptr<T[]> vals(new T[this->nnzs]);
-    std::shared_ptr<int[]> rows(new int[this->rows + 1]);
-    std::shared_ptr<int[]> cols(new int[this->nnzs]);
-    this->values = vals;
-    this->row_position = rows;
-    this->col_index = cols;
+    // Maximum number of nnzs in lower triangular matrix
+    int max_nnzs = size * (size + 1) / 2;
 
-    this->nnzs = std::round(size * size * (1.0 - sparsity));
+    // nnzs in lower triangular matrix based on input sparsity
+    double n = std::round((1.0 - sparsity) * (double)max_nnzs);
+    int nos = (int)n;
 
-    for (int i = 0; int i < n; i++)
+    // Initialise empty vectors
+    std::vector<int> R_rows;
+    std::vector<int> R_cols;
+    std::vector<T> R_values;
+
+    R_rows.push_back(0);
+
+    // There must be enough nnzs to fill the diagonal
+    if (nos < size)
     {
-        for (int j = row_position[i]; int j < row_position[i + 1]; j++)
+        nos = size;
+        std::cout << "Sparsity too high, so we used nnzs = size = " << size << std::endl;
+    }
+
+    // How many nnzs have been allocated
+    int counter = 0;
+
+    T v;
+
+    for (int i = 0; i < size; i++)
+    {
+        // The number of nnzs left to allocate must be larger
+        // than the number of rows left to go over
+        if (nos - counter > size - i && i != 0)
         {
-            col_indx = col_index[j];
-            if (col_indx = i)
+            for (int j = 0; j < i; j++)
             {
-                // Add diagonal element
+                if (nos - counter > size - i && i != 0)
+                {
+                    //
+                    v = rand() % 10 + 1;
+                    R_values.push_back((T)v);
+                    R_cols.push_back(j);
+                    counter += 1;
+                }
             }
+        }
+
+        v = rand() % 10 + 1;
+        R_values.push_back((T)v);
+        R_cols.push_back(i);
+        counter += 1;
+
+        R_rows.push_back(counter);
+        if (R_values.size() == nos)
+        {
+            break;
         }
     }
 
-    // make sure this number is even since we want to create a symmetric matrix
-    //const int offdiagonal = (nnzs - size) / 2 * 2;
+    std::shared_ptr<CSRMatrix<T>> R(new CSRMatrix<T>(size, size, nos, true));
 
-    std::cout << offdiagonal << std::endl;
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < R_cols.size(); i++)
     {
-        // loop over all rows
+        R->col_index[i] = R_cols[i];
+    }
+    for (int i = 0; i < R_rows.size(); i++)
+    {
+        R->row_position[i] = R_rows[i];
+    }
+    for (int i = 0; i < R_values.size(); i++)
+    {
+        R->values[i] = R_values[i];
     }
 
     // A = L L^T
+    // Get transpose of R
+    std::shared_ptr<CSRMatrix<T>> R_T = R->transpose();
+
+    // Do matrix multiplication
+    std::shared_ptr<CSRMatrix<T>> A = R->matMatMult(*R_T);
+
+    this->values = std::shared_ptr<T[]>(new T[A->nnzs]);
+    this->row_position = std::shared_ptr<int[]>(new int[A->rows + 1]);
+    this->col_index = std::shared_ptr<int[]>(new int[A->nnzs]);
+
+    for (int i = 0; i < A->nnzs; i++)
+    {
+        this->values[i] = A->values[i];
+        this->col_index[i] = A->col_index[i];
+    }
+
+    for (int i = 0; i < size + 1; i++)
+    {
+        this->row_position[i] = A->row_position[i];
+    }
+
+    this->rows = A->rows;
+    this->cols = A->rows;
+    this->nnzs = A->nnzs;
 }
 
 template <class T>
@@ -154,28 +223,35 @@ void CSRMatrix<T>::printMatrix()
 template <class T>
 void CSRMatrix<T>::print2DMatrix()
 {
-    // Initialise dense matrix format
-    std::vector<T> vals(this->rows * this->cols, 0);
-    std::cout << "Printing 2D Matrix" << std::endl;
-    for (int i = 0; i < this->rows; i++)
+    if (this->rows > 100)
     {
-        // rows indices of matrix
-        int r_start = row_position[i];
-        int r_end = row_position[i + 1];
-
-        // cii - index of col_index of array
-        for (int cii = r_start; cii < r_end; cii++)
+        std::cout << "Will NOT print 2D Matrix, as it's too long" << std::endl;
+    }
+    else
+    {
+        // Initialise dense matrix format
+        std::vector<T> vals(this->rows * this->cols, 0);
+        std::cout << "Printing 2D Matrix" << std::endl;
+        for (int i = 0; i < this->rows; i++)
         {
-            int ci = col_index[cii];
-            // Store non-zeros in row-major order
-            vals[ci + i * this->cols] = this->values[cii];
-        }
-        for (int j = 0; j < this->cols; j++)
-        {
-            std::cout << " " << vals[j + i * this->cols] << " ";
-        }
+            // rows indices of matrix
+            int r_start = row_position[i];
+            int r_end = row_position[i + 1];
 
-        std::cout << std::endl;
+            // cii - index of col_index of array
+            for (int cii = r_start; cii < r_end; cii++)
+            {
+                int ci = col_index[cii];
+                // Store non-zeros in row-major order
+                vals[ci + i * this->cols] = this->values[cii];
+            }
+            for (int j = 0; j < this->cols; j++)
+            {
+                std::cout << " " << vals[j + i * this->cols] << " ";
+            }
+
+            std::cout << std::endl;
+        }
     }
 }
 
