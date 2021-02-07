@@ -128,8 +128,7 @@ CSRMatrix<T>::CSRMatrix(int size, double sparsity)
             {
                 if (nos - counter > size - i && i != 0)
                 {
-                    //
-                    v = rand() % 10 + 1;
+                    v = rand() % 5 + 1;
                     R_values.push_back((T)v);
                     R_cols.push_back(j);
                     counter += 1;
@@ -137,7 +136,8 @@ CSRMatrix<T>::CSRMatrix(int size, double sparsity)
             }
         }
 
-        v = rand() % 10 + 1;
+        // these are the diagonal elements - make it diagonally dominant
+        v = rand() % 10 + 100;
         R_values.push_back((T)v);
         R_cols.push_back(i);
         counter += 1;
