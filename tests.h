@@ -434,7 +434,9 @@ bool test_cholesky()
     SparseSolver<double> sparse_solver = SparseSolver<double>(sparse_matrix1, b);
 
     std::shared_ptr<CSRMatrix<double>> R = sparse_solver.cholesky_decomp();
+
     std::vector<double> x(size, 0);
+
     sparse_solver.cholesky_solve(*R, x);
 
     // R->printMatrix();
@@ -491,9 +493,47 @@ bool test_sparse_lu()
     return true;
 }
 
+bool test_random_sparse_matrix()
+{
+    int size = 10;
+    CSRMatrix<double> rand_sparse = CSRMatrix<double>(size, 0.4);
+
+    if (rand_sparse.rows != size || rand_sparse.cols != size)
+    {
+        TestRunner::testError("Dimensions of random matrix are incorrect");
+        return false;
+    }
+
+    // compare to transpose to see whether it is symmetric
+    std::shared_ptr<CSRMatrix<double>> transpose = rand_sparse.transpose();
+
+    for (int i = 0; i < size + 1; i++)
+    {
+        if (rand_sparse.row_position[i] != transpose->row_position[i])
+        {
+            TestRunner::testError("row_position of random matrix and its transpose do not match");
+            return false;
+        }
+    }
+    for (int i = 0; i < rand_sparse.nnzs; i++)
+    {
+        if (rand_sparse.col_index[i] != transpose->col_index[i])
+        {
+            TestRunner::testError("col_index of random matrix and its transpose do not match");
+            return false;
+        }
+        if (rand_sparse.values[i] != transpose->values[i])
+        {
+            TestRunner::testError("values of random matrix and its transpose do not match");
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void run_tests()
 {
-
     // MATRIX
     TestRunner test_runner_matrix = TestRunner("Matrix");
     test_runner_matrix.test(&test_mat_vec_mult, "matrix vector multiplication.");
@@ -502,6 +542,7 @@ void run_tests()
     TestRunner test_runner_csrmatrix = TestRunner("CSRMatrix");
     test_runner_csrmatrix.test(&test_sparse_matmatmult_4x4, "sparse matMatMult for two sparse 4x4 matrices.");
     test_runner_csrmatrix.test(&test_sparse_matmatmult_5x5, "sparse matMatMult for multiplying a 5x5 sparse matrix by itself.");
+    test_runner_csrmatrix.test(&test_random_sparse_matrix, "constructor to create a random sparse matrix.");
 
     // SOLVER
     TestRunner test_runner_solver = TestRunner("Solver");
@@ -522,5 +563,4 @@ void run_tests()
     // UTILITIES
     TestRunner test_runner_utils = TestRunner("Utilities");
     test_runner_utils.test(&test_check_dimensions_matching, "checkDimensions for matching matrices.");
-    test_runner_utils.test(&test_check_dimensions_not_matching, "checkDimensions for non-matching matrices.");
 }

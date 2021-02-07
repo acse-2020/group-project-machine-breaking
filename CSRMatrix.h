@@ -12,6 +12,7 @@ public:
 
     // Constructor
     CSRMatrix(int rows, int cols, int nnzs, bool preallocate);
+    CSRMatrix(int size, double sparsity);
 
     //Constructor
     CSRMatrix(int rows, int cols, int nnzs, std::shared_ptr<T[]> values_ptr, std::shared_ptr<int[]> row_pos, std::shared_ptr<int[]> col_ind);
