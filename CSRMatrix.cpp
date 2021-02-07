@@ -82,19 +82,44 @@ CSRMatrix<T> &CSRMatrix<T>::operator=(const CSRMatrix<T> &M2)
     return *this;
 }
 
+// Constructor - random sparse matrix
 template <class T>
 CSRMatrix<T>::CSRMatrix(int size, double sparsity)
 {
+    // initialize random seed
+    srand (time(NULL));
+
+    std::shared_ptr<T[]> vals(new T[this->nnzs]);
+    std::shared_ptr<int[]> rows(new int[this->rows + 1]);
+    std::shared_ptr<int[]> cols(new int[this->nnzs]);
+    this->values = vals;
+    this->row_position = rows;
+    this->col_index = cols;
+
     this->nnzs = std::round(size * size * (1.0 - sparsity));
 
+    for (int i = 0; int i < n; i++)
+    {
+        for (int j = row_position[i]; int j < row_position[i + 1]; j++)
+        {
+            col_indx = col_index[j];
+            if (col_indx = i)
+            {
+                // Add diagonal element
+            }
+        }
+    }
+
     // make sure this number is even since we want to create a symmetric matrix
-    const int offdiagonal = (nnzs - size) / 2 * 2;
+    //const int offdiagonal = (nnzs - size) / 2 * 2;
 
     std::cout << offdiagonal << std::endl;
     for (int i = 0; i < size; i++)
     {
         // loop over all rows
     }
+
+    // A = L L^T
 }
 
 template <class T>
