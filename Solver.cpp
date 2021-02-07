@@ -82,7 +82,6 @@ void Solver<T>::stationaryIterative(std::vector<T> &x, double &tol, int &it_max,
 {
     T residual;
     T sum;
-    T sum2;
 
     // Initialise vector for row-matrix multiplication
     std::vector<T> b_estimate(x.size(), 0);
@@ -112,23 +111,19 @@ void Solver<T>::stationaryIterative(std::vector<T> &x, double &tol, int &it_max,
         {
             // sums of aij * xj
             sum = 0;
-            sum2 = 0;
+
             for (int j = 0; j < A.cols; j++)
             {
                 if (j != i && isGaussSeidel == false)
                 {
                     sum += A.values[i * A.cols + j] * x_old[j];
                 }
-                else if (j < i && isGaussSeidel)
+                else if (j != i)
                 {
                     sum += A.values[i * A.cols + j] * x[j];
                 }
-                else if (j > i && isGaussSeidel)
-                {
-                    sum2 += A.values[i * A.cols + j] * x[j];
-                }
             }
-            x[i] = (1.0 / A.values[i + i * A.rows]) * (b[i] - sum - sum2);
+            x[i] = (1.0 / A.values[i + i * A.rows]) * (b[i] - sum);
         }
 
         // Call residual calculation method

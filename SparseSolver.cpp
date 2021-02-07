@@ -70,7 +70,6 @@ void SparseSolver<T>::stationaryIterative(std::vector<T> &x, double &tol, int &i
             // Initialise sums of aij * xj
             T diagonal = 0;
             T sum = 0;
-            // T sum2 = 0;
 
             // loop over non-zero values in row r
             for (int item_index = A.row_position[r]; item_index < A.row_position[r + 1]; item_index++)
