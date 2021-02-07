@@ -383,7 +383,7 @@ bool test_gauss_seidel_dense_random()
 }
 
 bool test_lu_dense_random()
-{   
+{
     int size = 100;
     std::vector<double> x(size, 0);
     std::vector<double> output_b(size, 0);
@@ -446,7 +446,7 @@ bool test_cholesky()
 
     SparseSolver<double> sparse_solver = SparseSolver<double>(sparse_matrix1, b);
 
-    std::shared_ptr<CSRMatrix<double> > R = sparse_solver.cholesky_decomp();
+    std::shared_ptr<CSRMatrix<double>> R = sparse_solver.cholesky_decomp();
     std::vector<double> x(size, 0);
     sparse_solver.cholesky_solve(*R, x);
 

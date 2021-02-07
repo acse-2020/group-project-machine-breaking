@@ -12,7 +12,6 @@
 #include "TestRunner.h"
 #include "utilities.h"
 
-
 void performance_dense_jacobi_and_gauss_seidl(int minsize, int maxsize)
 {
     double tol = 1e-6;
@@ -31,7 +30,7 @@ void performance_dense_jacobi_and_gauss_seidl(int minsize, int maxsize)
         std::vector<double> x_j(size, 0);
         std::vector<double> x_gs(size, 0);
         std::vector<double> output_b(size, 0);
-        auto* solver = new Solver<double>(size);
+        auto *solver = new Solver<double>(size);
 
         // Time Jacobi
         auto t1 = std::chrono::high_resolution_clock::now();
@@ -50,7 +49,8 @@ void performance_dense_jacobi_and_gauss_seidl(int minsize, int maxsize)
         {
             myfile_j << size << "," << duration << std::endl;
         }
-        else std::cout << "Unable to open file";
+        else
+            std::cout << "Unable to open file";
 
         // Time Gauss Seidel
         t1 = std::chrono::high_resolution_clock::now();
@@ -69,7 +69,8 @@ void performance_dense_jacobi_and_gauss_seidl(int minsize, int maxsize)
         {
             myfile_gs << size << "," << duration << std::endl;
         }
-        else std::cout << "Unable to open file";
+        else
+            std::cout << "Unable to open file";
 
         // Delete objects to save memory usage
         delete solver;
@@ -80,7 +81,6 @@ void performance_dense_jacobi_and_gauss_seidl(int minsize, int maxsize)
     }
     myfile_j.close();
     myfile_gs.close();
-
 }
 
 void performance_lu_dense(int minsize, int maxsize)
@@ -111,7 +111,8 @@ void performance_lu_dense(int minsize, int maxsize)
         {
             myfile << size << "," << duration << std::endl;
         }
-        else std::cout << "Unable to open file";
+        else
+            std::cout << "Unable to open file";
 
         if (solver->residualCalc(x, b_output) > 1e-6)
         {
@@ -125,7 +126,6 @@ void performance_lu_dense(int minsize, int maxsize)
     myfile.close();
 }
 
-
 void run_performance()
 {
     int minsize = 100;
@@ -133,5 +133,4 @@ void run_performance()
 
     performance_lu_dense(minsize, maxsize);
     performance_dense_jacobi_and_gauss_seidl(minsize, maxsize);
-
 }
