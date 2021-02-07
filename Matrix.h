@@ -18,7 +18,7 @@ public:
 
     // Copy constructor
     Matrix(const Matrix<T> &M2);
-    
+
     // Overload assignment operator to deepcopy
     Matrix<T> &operator=(const Matrix<T> &M2);
 
@@ -29,17 +29,10 @@ public:
     void printValues();
     virtual void printMatrix();
 
-    /* matMatMul function should not be virtual, since in the derived class
-   CSRMatrix we want to specify the input type as CSRMatrix */
     void matMatMult(Matrix<T> &mat_right, Matrix<T> &output);
 
     void matVecMult(std::vector<T> &vec, std::vector<T> &output);
 
-    // Solve simple Ax=b system with Jacobi method
-    //virtual void Jacobi(Matrix &RHS, Matrix &unknowns, double &tol, int &it_max);
-
-    // Explicitly using the C++11 nullptr here
-    //T *values = nullptr;
     std::shared_ptr<T[]> values;
     int rows = -1;
     int cols = -1;

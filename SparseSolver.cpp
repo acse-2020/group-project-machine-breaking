@@ -39,7 +39,6 @@ T SparseSolver<T>::residualCalc(std::vector<T> &x, std::vector<T> &output_b)
     return sqrt(residual);
 }
 
-// NOTE: this is currently only implemented for isGaussSeidel = false
 template <class T>
 void SparseSolver<T>::stationaryIterative(std::vector<T> &x, double &tol, int &it_max, bool isGaussSeidel)
 {
@@ -137,9 +136,6 @@ void SparseSolver<T>::conjugateGradient(std::vector<T> &x, double &tol, int &it_
     {
         x[i] = 0;
     }
-
-    // Calculate estimate of b
-    // A.matVecMult(x, b_estimate);
 
     // Find the norm between old value and new guess
     for (int i = 0; i < x.size(); i++)
@@ -559,12 +555,7 @@ std::shared_ptr<CSRMatrix<T>> SparseSolver<T>::cholesky_decomp()
                                     A_ij = A.values[k];
                                 }
                             }
-                            // std::cout << "A_ij " << A_ij << std::endl;
-                            // std::cout << "sum_ij " << sum_ij << std::endl;
 
-                            // std::cout << "R_ij " << R_values[diag] << std::endl;
-
-                            // Lij = (Lij - sum(Lik[:j]*Rjk[:j])/Ljj; for i>j
                             R_values.push_back((A_ij - sum_ij) / R_values[diag]);
                         }
                     }
@@ -624,9 +615,6 @@ void SparseSolver<T>::cholesky_solve(CSRMatrix<T> &R, std::vector<T> &x)
     checkDimensions(A, x);
 
     std::shared_ptr<CSRMatrix<T>> R_T = R.transpose();
-
-    // R_T->printMatrix();
-    // R_T->print2DMatrix();
 
     // The unknown x will be used as temporary storage for y.
     // The equations for forward and backward substitution have

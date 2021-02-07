@@ -65,7 +65,7 @@ template <class T>
 T Solver<T>::residualCalc(std::vector<T> &x, std::vector<T> &output_b)
 {
     T residual = 0;
-    // A x = b(estimate)
+
     A.matVecMult(x, output_b);
 
     // Find the norm between old value and new guess
