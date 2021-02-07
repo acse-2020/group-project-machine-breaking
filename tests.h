@@ -322,6 +322,66 @@ bool test_lu_dense()
     return true;
 }
 
+bool test_jacobi_dense_random()
+{
+    int size = 100;
+    double tol = 1e-6;
+    int it_max = 1000;
+
+    std::vector<double> x(size, 0);
+    std::vector<double> output_b(size, 0);
+
+    auto solver = Solver<double>(size);
+
+    auto t1 = std::chrono::high_resolution_clock::now();
+
+    solver.stationaryIterative(x, tol, it_max, false);
+
+    auto t2 = std::chrono::high_resolution_clock::now();
+
+    auto duration = std::chrono::duration<double>(t2 - t1).count();
+
+    std::cout << "Time taken for Jacobi: " << duration << " s " << std::endl
+              << std::endl;
+
+    if (solver.residualCalc(x, output_b) > 1e-6)
+    {
+        TestRunner::testError("Jacobi residual is above 1e-6");
+        return false;
+    }
+    return true;
+}
+
+bool test_gauss_seidel_dense_random()
+{
+    int size = 100;
+    double tol = 1e-6;
+    int it_max = 1000;
+
+    std::vector<double> x(size, 0);
+    std::vector<double> output_b(size, 0);
+
+    auto solver = Solver<double>(size);
+
+    auto t1 = std::chrono::high_resolution_clock::now();
+
+    solver.stationaryIterative(x, tol, it_max, true);
+
+    auto t2 = std::chrono::high_resolution_clock::now();
+
+    auto duration = std::chrono::duration<double>(t2 - t1).count();
+
+    std::cout << "Time taken for Gauss-Seidel: " << duration << " s " << std::endl
+              << std::endl;
+
+    if (solver.residualCalc(x, output_b) > 1e-6)
+    {
+        TestRunner::testError("Gauss-Seidel residual is above 1e-6");
+        return false;
+    }
+    return true;
+}
+
 bool test_lu_dense_random()
 {
     int size = 100;
@@ -464,6 +524,8 @@ void run_tests()
     test_runner.test(&test_sparse_matmatmult_4x4, "sparse matMatMult for two sparse 4x4 matrices.");
     test_runner.test(&test_sparse_matmatmult_5x5, "sparse matMatMult for multiplying a 5x5 sparse matrix by itself.");
     test_runner.test(&test_dense_jacobi_and_gauss_seidl, "stationaryIterative: dense Jacobi and Gauss-Seidel solver for 4x4 matrix.");
+    test_runner.test(&test_jacobi_dense_random, "dense Jacobi with a random 100x100 matrix");
+    test_runner.test(&test_gauss_seidel_dense_random, "dense Gauss Seidel with a random 100x100 matrix");
     test_runner.test(&test_lu_dense, "dense LU solver for 4x4 matrix.");
     test_runner.test(&test_sparse_stationary_iterative, "sparse Jacobi solver for 4x4 matrix.");
     test_runner.test(&test_sparse_CG, "sparse conjugate gradient solver for 4x4 matrix.");
