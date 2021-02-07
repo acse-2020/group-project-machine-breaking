@@ -378,6 +378,7 @@ void SparseSolver<T>::cholesky_solve(CSRMatrix<T> &R, std::vector<T> &x)
 
     std::shared_ptr<CSRMatrix<T>> R_T = R.transpose();
 
+    R_T->printMatrix();
     R_T->print2DMatrix();
 
     // The unknown x will be used as temporary storage for y.
@@ -391,11 +392,8 @@ void SparseSolver<T>::cholesky_solve(CSRMatrix<T> &R, std::vector<T> &x)
     // Need to keep track of permutation of RHS as well
     for (i = 0; i < n; i++)
     {
-        // ip = perm_indx[i];
         sum = x[i];
-        // x[ip] = x[i];
-        // row_start = R.row_position[i];
-        // row_len = R.row_position[i + 1] - row_start;
+
         for (j = R.row_position[i]; j < R.row_position[i + 1]; j++)
         {
             col_indx = R.col_index[j];
@@ -404,8 +402,7 @@ void SparseSolver<T>::cholesky_solve(CSRMatrix<T> &R, std::vector<T> &x)
                 break;
             sum -= R.values[j] * x[col_indx];
         }
-        x[i] = sum;
-        // std::cout << "sum: " << x[i] << std::endl;
+        x[i] = sum / R.values[j];
     }
 
     // Perform backward substitution to solve U*x = y

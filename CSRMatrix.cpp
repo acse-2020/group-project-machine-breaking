@@ -84,7 +84,7 @@ void CSRMatrix<T>::print2DMatrix()
 }
 
 template <class T>
-CSRMatrix<T> CSRMatrix<T>::transpose()
+std::shared_ptr<CSRMatrix<T> > CSRMatrix<T>::transpose()
 {
     // TO DO: comment
     std::vector<int> t_values;
@@ -120,19 +120,19 @@ CSRMatrix<T> CSRMatrix<T>::transpose()
     }
 
     // Construct transposed matrix
-    CSRMatrix<T> t_Matrix = CSRMatrix<T>(t_rows.size() - 1, this->rows, nnzs, true);
+    std::shared_ptr<CSRMatrix<T> > t_Matrix(new CSRMatrix<T>(this->rows, this->rows, nnzs, true));
 
     for (int i = 0; i < t_cols.size(); i++)
     {
-        t_Matrix.col_index[i] = t_cols[i];
+        t_Matrix->col_index[i] = t_cols[i];
     }
     for (int i = 0; i < t_rows.size(); i++)
     {
-        t_Matrix.row_position[i] = t_rows[i];
+        t_Matrix->row_position[i] = t_rows[i];
     }
     for (int i = 0; i < t_values.size(); i++)
     {
-        t_Matrix.values[i] = t_values[i];
+        t_Matrix->values[i] = t_values[i];
     }
 
     return t_Matrix;

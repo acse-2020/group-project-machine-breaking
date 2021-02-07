@@ -21,8 +21,8 @@ public:
 
     std::shared_ptr<CSRMatrix<T>> matMatMult(CSRMatrix<T> &mat_right);
 
-    CSRMatrix<T> transpose();
     CSRMatrix<T> cholesky();
+    std::shared_ptr<CSRMatrix<T>> transpose();
 
     std::shared_ptr<int[]> row_position; //create nullpointer
     std::shared_ptr<int[]> col_index;    // create nullpointer
