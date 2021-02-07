@@ -87,7 +87,7 @@ template <class T>
 std::shared_ptr<CSRMatrix<T> > CSRMatrix<T>::transpose()
 {
     // TO DO: comment
-    std::vector<int> t_values;
+    std::vector<T> t_values;
     std::vector<int> t_cols;
     std::vector<int> t_rows;
 
@@ -158,7 +158,7 @@ void CSRMatrix<T>::matVecMult(std::vector<T> &input, std::vector<T> &output)
 }
 
 template <class T>
-std::shared_ptr<CSRMatrix<T>> CSRMatrix<T>::matMatMult(CSRMatrix<T> &mat_right)
+std::shared_ptr<CSRMatrix<T> > CSRMatrix<T>::matMatMult(CSRMatrix<T> &mat_right)
 {
     // for now, we assume output has been preallocated
     std::vector<T> output_all_values{};
@@ -223,7 +223,7 @@ std::shared_ptr<CSRMatrix<T>> CSRMatrix<T>::matMatMult(CSRMatrix<T> &mat_right)
         }
     }
 
-    std::shared_ptr<CSRMatrix<T>> result(new CSRMatrix<T>(this->rows, mat_right.cols, output_cols.size(), true));
+    std::shared_ptr<CSRMatrix<T> > result(new CSRMatrix<T>(this->rows, mat_right.cols, output_cols.size(), true));
 
     for (int i = 0; i < output_cols.size(); i++)
     {

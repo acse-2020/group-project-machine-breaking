@@ -189,7 +189,7 @@ void SparseSolver<T>::conjugateGradient(std::vector<T> &x, double &tol, int &it_
 }
 
 template <class T>
-std::shared_ptr<CSRMatrix<T>> SparseSolver<T>::cholesky_decomp()
+std::shared_ptr<CSRMatrix<T> > SparseSolver<T>::cholesky_decomp()
 {
     // for now, we assume output has been preallocated
     std::vector<T> R_values{};
@@ -351,7 +351,7 @@ std::shared_ptr<CSRMatrix<T>> SparseSolver<T>::cholesky_decomp()
         }
     }
 
-    std::shared_ptr<CSRMatrix<T>> sparse_mat_ptr(new CSRMatrix<T>(A.rows, A.cols, R_values.size(), true));
+    std::shared_ptr<CSRMatrix<T> > sparse_mat_ptr(new CSRMatrix<T>(A.rows, A.cols, R_values.size(), true));
 
     for (int i = 0; i < R_values.size(); i++)
     {
@@ -377,10 +377,10 @@ void SparseSolver<T>::cholesky_solve(CSRMatrix<T> &R, std::vector<T> &x)
 
     checkDimensions(A, x);
 
-    std::shared_ptr<CSRMatrix<T>> R_T = R.transpose();
+    std::shared_ptr<CSRMatrix<T> > R_T = R.transpose();
 
-    R_T->printMatrix();
-    R_T->print2DMatrix();
+    // R_T->printMatrix();
+    // R_T->print2DMatrix();
 
     // The unknown x will be used as temporary storage for y.
     // The equations for forward and backward substitution have
