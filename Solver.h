@@ -23,7 +23,7 @@ public:
     // destructor
     virtual ~Solver();
 
-    double residualCalc(std::vector<T> &x, std::vector<T> &b_estimate);
+    T residualCalc(std::vector<T> &x, std::vector<T> &b_estimate);
 
     // Jacobi or Gauss-Seidel
     void stationaryIterative(std::vector<T> &x, double &tol, int &it_max, bool isGaussSeidel);

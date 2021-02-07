@@ -62,9 +62,9 @@ Solver<T>::~Solver()
 }
 
 template <class T>
-double Solver<T>::residualCalc(std::vector<T> &x, std::vector<T> &b_estimate)
+T Solver<T>::residualCalc(std::vector<T> &x, std::vector<T> &b_estimate)
 {
-    double residual = 0;
+    T residual = 0;
     // A x = b(estimate)
     A.matVecMult(x, b_estimate);
 

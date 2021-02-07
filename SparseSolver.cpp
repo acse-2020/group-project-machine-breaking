@@ -24,9 +24,9 @@ SparseSolver<T>::~SparseSolver()
 
 // TODO: move this to utilities?
 template <class T>
-double SparseSolver<T>::residualCalc(std::vector<T> &x, std::vector<T> &b_estimate)
+T SparseSolver<T>::residualCalc(std::vector<T> &x, std::vector<T> &b_estimate)
 {
-    double residual = 0;
+    T residual = 0;
     // A x = b(estimate)
     A.matVecMult(x, b_estimate);
 
