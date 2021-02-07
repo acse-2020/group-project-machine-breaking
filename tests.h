@@ -242,6 +242,81 @@ bool test_sparse_stationary_iterative()
     return TestRunner::assertBelowTolerance(residual, 1e-6);
 }
 
+// Sparse Jacobi
+bool test_sparse_jacobi_random()
+{
+    // leave it at 10 since jacobi is not very stable for large matrices
+    int size = 10;
+    double tol = 1e-6;
+    int it_max = 1000;
+
+    CSRMatrix<double> m = CSRMatrix<double>(size, 0.7);
+    std::vector<double> b(size, 0);
+    for (int i = 0; i < size; i++)
+    {
+        b[i] = i;
+    }
+
+    SparseSolver<double> sparse_solver = SparseSolver<double>(m, b);
+    std::vector<double> x(size, 0);
+
+    auto t1 = std::chrono::high_resolution_clock::now();
+    sparse_solver.stationaryIterative(x, tol, it_max, false);
+    auto t2 = std::chrono::high_resolution_clock::now();
+
+    auto duration = std::chrono::duration<double>(t2 - t1).count();
+    std::cout << "Time taken for sparse Jacobi with random 10x10 matrix: " << duration << " s " << std::endl
+              << std::endl;
+
+    std::vector<double> output_b(size, 0);
+
+    printVector(x);
+
+    if (sparse_solver.residualCalc(x, output_b) > 1e-6)
+    {
+        TestRunner::testError("Sparse Jacobi residual is above 1e-6");
+        return false;
+    }
+    return true;
+}
+
+// Sparse Gauss Seidel
+bool test_sparse_gauss_seidel_random()
+{
+    int size = 100;
+    double tol = 1e-6;
+    int it_max = 1000;
+
+    CSRMatrix<double> m = CSRMatrix<double>(size, 0.7);
+    std::vector<double> b(size, 0);
+    for (int i = 0; i < size; i++)
+    {
+        b[i] = i;
+    }
+
+    SparseSolver<double> sparse_solver = SparseSolver<double>(m, b);
+    std::vector<double> x(size, 0);
+
+    auto t1 = std::chrono::high_resolution_clock::now();
+    sparse_solver.stationaryIterative(x, tol, it_max, true);
+    auto t2 = std::chrono::high_resolution_clock::now();
+
+    auto duration = std::chrono::duration<double>(t2 - t1).count();
+    std::cout << "Time taken for sparse Gauss-Seidel with random 100x100 matrix: " << duration << " s " << std::endl
+              << std::endl;
+
+    std::vector<double> output_b(size, 0);
+
+    printVector(x);
+
+    if (sparse_solver.residualCalc(x, output_b) > 1e-6)
+    {
+        TestRunner::testError("Sparse Gauss Seidel residual is above 1e-6");
+        return false;
+    }
+    return true;
+}
+
 bool test_sparse_CG()
 {
     int size = 4;
@@ -375,7 +450,7 @@ bool test_lu_dense_random()
     auto duration = std::chrono::duration<double>(t2 - t1).count();
     std::cout << "Time taken for LU: " << duration << " s " << std::endl
               << std::endl;
-  
+
     // use a second b array
     std::vector<double> b_new(size, 0);
     std::vector<double> x_new(size, 0);
@@ -398,36 +473,14 @@ bool test_lu_dense_random()
 
 bool test_cholesky()
 {
-    // int nnzs = 26;
-    // int init_row_position1[] = {0, 3, 6, 9, 13, 17, 20, 22, 26};
-    // int init_col_index1[] = {0, 4, 7, 1, 3, 4, 2, 3, 7, 1, 2, 3, 6, 0, 1, 4, 5, 4, 5, 7, 3, 6, 0, 2, 5, 7};
-    // double init_sparse_values1[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-
-    // int nnzs = 7;
-    // int init_row_position1[] = {0, 3, 5, 7};
-    // int init_col_index1[] = {0, 1, 2, 0, 1, 0, 2};
-    // double init_sparse_values1[] = {25, 15, -5, 15, 18, -5, 11};
-
-    // int nnzs = 14;
-    // int init_row_position1[] = {0, 3, 6, 10, 14};
-    // int init_col_index1[] = {0, 2, 3, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
-    // double init_sparse_values1[] = {9, -27, 18, 9, -9, -27, -27, -9, 99, -27, 18, -27, -27, 121};
-
     int size = 4;
-
     int nnzs = 14;
+
     std::shared_ptr<int[]> init_row_position1(new int[size + 1]{0, 3, 6, 10, 14});
     std::shared_ptr<int[]> init_col_index1(new int[nnzs]{0, 2, 3, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3});
     std::shared_ptr<double[]> init_sparse_values1(new double[nnzs]{9, -27, 18, 9, -9, -27, -27, -9, 99, -27, 18, -27, -27, 121});
 
-    // std::shared_ptr<int[]> init_row_position1(new int[size + 1]{0, 3, 6, 9});
-    // std::shared_ptr<int[]> init_col_index1(new int[nnzs]{0, 1, 2, 0, 1, 2, 0, 1, 2});
-    // std::shared_ptr<double[]> init_sparse_values1(new double[nnzs]{6, 15, 55, 15, 55, 225, 55, 225, 979});
-
     CSRMatrix<double> sparse_matrix1 = CSRMatrix<double>(size, size, nnzs, init_sparse_values1, init_row_position1, init_col_index1);
-
-    // sparse_matrix1.printMatrix();
-    // sparse_matrix1.print2DMatrix();
 
     std::vector<double> b = {-0.5, 1.5, -2.5, 4.5};
 
@@ -438,9 +491,6 @@ bool test_cholesky()
     std::vector<double> x(size, 0);
 
     sparse_solver.cholesky_solve(*R, x);
-
-    // R->printMatrix();
-    // R->print2DMatrix();
 
     std::cout << "Result: ";
     for (int i = 0; i < x.size(); i++)
@@ -458,6 +508,33 @@ bool test_cholesky()
     }
 
     return true;
+}
+
+bool test_random_cholesky()
+{
+    int size = 100;
+    double sparsity = 0.7;
+
+    CSRMatrix<double> sparse_matrix1 = CSRMatrix<double>(size, sparsity);
+
+    std::vector<double> b(size, 0);
+    for (int i = 0; i < size; i++)
+    {
+        b[i] = i;
+    }
+
+    SparseSolver<double> sparse_solver = SparseSolver<double>(sparse_matrix1, b);
+
+    std::shared_ptr<CSRMatrix<double>> R = sparse_solver.cholesky_decomp();
+
+    std::vector<double> x(size, 0);
+
+    sparse_solver.cholesky_solve(*R, x);
+
+    std::vector<double> b_estimate(size, 0);
+
+    double residual = sparse_solver.residualCalc(x, b_estimate);
+    return TestRunner::assertBelowTolerance(residual, 1e-6);
 }
 
 bool test_sparse_lu()
@@ -491,6 +568,34 @@ bool test_sparse_lu()
     }
 
     return true;
+}
+
+bool test_random_sparse_lu()
+{
+    int size = 100;
+    double sparsity = 0.7;
+
+    CSRMatrix<double> sparse_matrix1 = CSRMatrix<double>(size, sparsity);
+
+    std::vector<double> b(size, 0);
+    std::vector<int> perm(size, 0);
+
+    for (int i = 0; i < size; i++)
+    {
+        b[i] = i + 1;
+        perm[i] = i;
+    }
+    // NOTE: we haven't implemented partial pivoting, but the permutation vector could be used in the lu_solve method
+    SparseSolver<double> sparse_solver = SparseSolver<double>(sparse_matrix1, b);
+    std::vector<double> x(size, 0);
+
+    auto LU = sparse_solver.lu_decomp();
+    sparse_solver.lu_solve(*LU, perm, x);
+
+    std::vector<double> b_estimate(size, 0);
+
+    double residual = sparse_solver.residualCalc(x, b_estimate);
+    return TestRunner::assertBelowTolerance(residual, 1e-6);
 }
 
 bool test_random_sparse_matrix()
@@ -556,9 +661,13 @@ void run_tests()
     // SPARSE SOLVER
     TestRunner test_runner_ss = TestRunner("SparseSolver");
     test_runner_ss.test(&test_sparse_stationary_iterative, "sparse Jacobi solver for 4x4 matrix.");
+    test_runner_ss.test(&test_sparse_jacobi_random, "sparse Jacobi solver for random 10x10 matrix.");
+    test_runner_ss.test(&test_sparse_gauss_seidel_random, "sparse Gauss-Seidel solver for random 100x100 matrix.");
     test_runner_ss.test(&test_sparse_CG, "sparse conjugate gradient solver for 4x4 matrix.");
     test_runner_ss.test(&test_sparse_lu, "sparse LU decomposition.");
+    test_runner_ss.test(&test_random_sparse_lu, "LU method with random 100x100 matrix.");
     test_runner_ss.test(&test_cholesky, "Cholesky method.");
+    test_runner_ss.test(&test_random_cholesky, "Cholesky method with random 100x100 matrix.");
 
     // UTILITIES
     TestRunner test_runner_utils = TestRunner("Utilities");
