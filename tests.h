@@ -15,6 +15,52 @@
 #include "utilities.h"
 #include <memory>
 
+bool test_residual_calculation()
+{
+    int size = 4;
+
+    std::shared_ptr<double[]> values(new double[size * size]{1., 2., 3., 4., -4., -3., -2., -1., 0., 1., 2., 0., 1., 2., 3., 4.});
+
+    Matrix<double> m = Matrix<double>(size, size, values);
+
+    std::vector<double> b{4., -6., -4., 4.};
+    std::vector<double> x{1., 1., -2., 2.};
+    std::vector<double> b_output(size, 0);
+
+    Solver<double> solver = Solver<double>(m, b);
+    double res = solver.residualCalc(x, b_output);
+
+    double expected = 2.;
+
+    return res == expected;
+}
+
+bool test_mat_vec_mult()
+{
+    int size = 4;
+
+    std::shared_ptr<int[]> values(new int[size * size]{1, 2, 3, 4, -4, -3, -2, -1, 0, 1, 2, 0, 1, 2, 3, 4});
+
+    Matrix<int> m = Matrix<int>(size, size, values);
+
+    std::vector<int> v{1, 2, -3, 2};
+    std::vector<int> result(size, 0);
+
+    m.matVecMult(v, result);
+
+    std::vector<int> expected{4, -6, -4, 4};
+
+    for (int i = 0; i < size; i++)
+    {
+        if (result[i] != expected[i])
+        {
+            TestRunner::testError("Result doesn't match expected values");
+            return false;
+        }
+    }
+    return true;
+}
+
 // test functions should start with 'test_' prefix
 bool test_sparse_matmatmult_5x5()
 {
@@ -276,6 +322,66 @@ bool test_lu_dense()
     return true;
 }
 
+bool test_jacobi_dense_random()
+{
+    int size = 100;
+    double tol = 1e-6;
+    int it_max = 1000;
+
+    std::vector<double> x(size, 0);
+    std::vector<double> output_b(size, 0);
+
+    auto solver = Solver<double>(size);
+
+    auto t1 = std::chrono::high_resolution_clock::now();
+
+    solver.stationaryIterative(x, tol, it_max, false);
+
+    auto t2 = std::chrono::high_resolution_clock::now();
+
+    auto duration = std::chrono::duration<double>(t2 - t1).count();
+
+    std::cout << "Time taken for Jacobi: " << duration << " s " << std::endl
+              << std::endl;
+
+    if (solver.residualCalc(x, output_b) > 1e-6)
+    {
+        TestRunner::testError("Jacobi residual is above 1e-6");
+        return false;
+    }
+    return true;
+}
+
+bool test_gauss_seidel_dense_random()
+{
+    int size = 100;
+    double tol = 1e-6;
+    int it_max = 1000;
+
+    std::vector<double> x(size, 0);
+    std::vector<double> output_b(size, 0);
+
+    auto solver = Solver<double>(size);
+
+    auto t1 = std::chrono::high_resolution_clock::now();
+
+    solver.stationaryIterative(x, tol, it_max, true);
+
+    auto t2 = std::chrono::high_resolution_clock::now();
+
+    auto duration = std::chrono::duration<double>(t2 - t1).count();
+
+    std::cout << "Time taken for Gauss-Seidel: " << duration << " s " << std::endl
+              << std::endl;
+
+    if (solver.residualCalc(x, output_b) > 1e-6)
+    {
+        TestRunner::testError("Gauss-Seidel residual is above 1e-6");
+        return false;
+    }
+    return true;
+}
+
 bool test_lu_dense_random()
 {
     int size = 100;
@@ -302,7 +408,6 @@ bool test_lu_dense_random()
     }
     return true;
 }
-
 
 bool test_cholesky()
 {
@@ -412,11 +517,15 @@ bool test_sparse_lu()
 void run_tests()
 {
     TestRunner test_runner = TestRunner();
+    test_runner.test(&test_mat_vec_mult, "matrix vector multiplication.");
+    test_runner.test(&test_residual_calculation, "calcResidual method.");
     test_runner.test(&test_check_dimensions_matching, "checkDimensions for matching matrices.");
     test_runner.test(&test_check_dimensions_not_matching, "checkDimensions for non-matching matrices.");
     test_runner.test(&test_sparse_matmatmult_4x4, "sparse matMatMult for two sparse 4x4 matrices.");
     test_runner.test(&test_sparse_matmatmult_5x5, "sparse matMatMult for multiplying a 5x5 sparse matrix by itself.");
     test_runner.test(&test_dense_jacobi_and_gauss_seidl, "stationaryIterative: dense Jacobi and Gauss-Seidel solver for 4x4 matrix.");
+    test_runner.test(&test_jacobi_dense_random, "dense Jacobi with a random 100x100 matrix");
+    test_runner.test(&test_gauss_seidel_dense_random, "dense Gauss Seidel with a random 100x100 matrix");
     test_runner.test(&test_lu_dense, "dense LU solver for 4x4 matrix.");
     test_runner.test(&test_sparse_stationary_iterative, "sparse Jacobi solver for 4x4 matrix.");
     test_runner.test(&test_sparse_CG, "sparse conjugate gradient solver for 4x4 matrix.");

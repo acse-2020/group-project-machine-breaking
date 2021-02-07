@@ -101,7 +101,7 @@ void Matrix<T>::printMatrix()
 template <class T>
 void Matrix<T>::matVecMult(std::vector<T> &vec, std::vector<T> &output)
 {
-    double sum1;
+    T sum1;
 
     for (int i = 0; i < this->rows; i++)
     {
