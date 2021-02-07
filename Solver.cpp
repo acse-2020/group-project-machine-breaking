@@ -6,7 +6,6 @@
 #include <vector>
 #include <memory>
 #include <random>
-#include "utilities.h"
 
 // Constructor
 template <class T>
@@ -24,11 +23,12 @@ Solver<T>::Solver(Matrix<T> &A, std::vector<T> &b) : A(A), b(b)
 template <class T>
 Solver<T>::Solver(int size) : size(size)
 {
-    // retuns a pointer that needs to be deleted
+    // Set random seed
+    srand(time(NULL));
+
     // create random diagonally dominant matrices
     A = Matrix<T>(size, size, true);
     b.reserve(size);
-
     for (int i = 0; i < size; i++)
     {
         b.push_back(T(rand() % 10 + 1));
@@ -36,7 +36,7 @@ Solver<T>::Solver(int size) : size(size)
         {
             if (i == j)
             {
-                A.values[i * size + j] = T(rand() % 10 + 10);
+                A.values[i * size + j] = T(rand() % 100000 + 10);
             }
             else
             {
@@ -78,7 +78,7 @@ T Solver<T>::residualCalc(std::vector<T> &x, std::vector<T> &output_b)
 
 // Jacobi and Gauss-Seidel iterative solvers
 template <class T>
-void Solver<T>::stationaryIterative(std::vector<T> &x, double &tol, int &it_max, bool isGaussSeidel)
+void Solver<T>::stationaryIterative(std::vector<T> &x, double &tol, int &it_max, bool isGaussSeidel, bool print)
 {
     T residual;
     T sum;
@@ -139,14 +139,14 @@ void Solver<T>::stationaryIterative(std::vector<T> &x, double &tol, int &it_max,
         {
             // Update the solution from previous iteration with
             // new estimate for Jacobi
-            for (int i = 0; i < x.size(); i++)
-            {
-                x_old[i] = x[i];
-            }
+            x_old = x;
         }
     }
-    std::cout << "k is :" << k << std::endl;
-    std::cout << "residual is :" << residual << std::endl;
+    if (print)
+    {
+        std::cout << "k is :" << k << std::endl;
+        std::cout << "residual is :" << residual << std::endl;
+    }
 }
 
 // LU decomposition
