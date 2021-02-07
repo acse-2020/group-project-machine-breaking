@@ -76,36 +76,44 @@ T Solver<T>::residualCalc(std::vector<T> &x, std::vector<T> &b_estimate)
     return sqrt(residual);
 }
 
+// Jacobi and Gauss-Seidel iterative solvers
 template <class T>
 void Solver<T>::stationaryIterative(std::vector<T> &x, double &tol, int &it_max, bool isGaussSeidel)
 {
-    // TODO: check diagonal dominance
-    // TODO: add more comments
+    T residual;
+    T sum;
+    T sum2;
 
-    // Initialise matrix for row-matrix multiplication
-    // and matrix for storing previous iteration
-    double residual;
+    // Initialise vector for row-matrix multiplication
     std::vector<T> b_estimate(x.size(), 0);
-    std::vector<T> x_old(x.size(), 0);
+
+    // vector for storing previous iteration if necessary
+    std::vector<T> x_old;
+    if (isGaussSeidel == false)
+    {
+        x_old = std::vector<T>(x.size(), 0);
+    }
 
     // Check our dimensions match
     checkDimensions(A, b);
     checkDimensions(A, x);
 
-    // Set values to zero before hand
+    // Set values to zero beforehand
     for (int i = 0; i < x.size(); i++)
     {
         x[i] = 0;
     }
+
+    // declare k beforehand so it is available outside of the for loop scope
     int k;
     for (k = 0; k < it_max; k++)
     {
         for (int i = 0; i < A.rows; i++)
         {
-            // Initialise sums of aij * xj
-            double sum = 0;
-            double sum2 = 0;
-            for (int j = 0; j < A.rows; j++)
+            // sums of aij * xj
+            sum = 0;
+            sum2 = 0;
+            for (int j = 0; j < A.cols; j++)
             {
                 if (j != i && isGaussSeidel == false)
                 {
@@ -125,22 +133,13 @@ void Solver<T>::stationaryIterative(std::vector<T> &x, double &tol, int &it_max,
 
         // Call residual calculation method
         residual = residualCalc(x, b_estimate);
-        // // A x = b(estimate)
-        // A.matMatMult(x, b_estimate);
-
-        // // Find the norm between old value and new guess
-        // residual = 0;
-        // for (int i = 0; i < A.rows; i++)
-        // {
-        //     residual += pow(b_estimate[i] - b[i], 2.0);
-        // }
-        // residual = sqrt(residual);
 
         // End iterations if tolerance convergence is reached
         if (residual < tol)
         {
             break;
         }
+
         if (isGaussSeidel == false)
         {
             // Update the solution from previous iteration with
