@@ -5,6 +5,7 @@
 #include <vector>
 #include "utilities.h"
 #include <memory>
+#include <algorithm>
 
 template <class T>
 SparseSolver<T>::SparseSolver(CSRMatrix<T> &A, std::vector<T> &b) : A(A), b(b)
