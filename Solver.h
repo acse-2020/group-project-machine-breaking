@@ -30,6 +30,8 @@ public:
 
     std::vector<int> lu_decomp(Matrix<T> &LU);
     void lu_solve(Matrix<T> &LU, std::vector<int> &piv, std::vector<T> &x);
+    // method is overloaded, so instead of using this->b, you could also pass different values of b
+    void lu_solve(Matrix<T> &LU, std::vector<int> &piv, std::vector<T> &x, std::vector<T> &b_lu);
 
     int size = -1;
 };
