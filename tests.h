@@ -15,6 +15,52 @@
 #include "utilities.h"
 #include <memory>
 
+bool test_residual_calculation()
+{
+    int size = 4;
+
+    std::shared_ptr<double[]> values(new double[size * size]{1., 2., 3., 4., -4., -3., -2., -1., 0., 1., 2., 0., 1., 2., 3., 4.});
+
+    Matrix<double> m = Matrix<double>(size, size, values);
+
+    std::vector<double> b{4., -6., -4., 4.};
+    std::vector<double> x{1., 1., -2., 2.};
+    std::vector<double> b_output(size, 0);
+
+    Solver<double> solver = Solver<double>(m, b);
+    double res = solver.residualCalc(x, b_output);
+
+    double expected = 2.;
+
+    return res == expected;
+}
+
+bool test_mat_vec_mult()
+{
+    int size = 4;
+
+    std::shared_ptr<int[]> values(new int[size * size]{1, 2, 3, 4, -4, -3, -2, -1, 0, 1, 2, 0, 1, 2, 3, 4});
+
+    Matrix<int> m = Matrix<int>(size, size, values);
+
+    std::vector<int> v{1, 2, -3, 2};
+    std::vector<int> result(size, 0);
+
+    m.matVecMult(v, result);
+
+    std::vector<int> expected{4, -6, -4, 4};
+
+    for (int i = 0; i < size; i++)
+    {
+        if (result[i] != expected[i])
+        {
+            TestRunner::testError("Result doesn't match expected values");
+            return false;
+        }
+    }
+    return true;
+}
+
 // test functions should start with 'test_' prefix
 bool test_sparse_matmatmult_5x5()
 {
@@ -303,7 +349,6 @@ bool test_lu_dense_random()
     return true;
 }
 
-
 bool test_cholesky()
 {
     // int nnzs = 26;
@@ -412,6 +457,8 @@ bool test_sparse_lu()
 void run_tests()
 {
     TestRunner test_runner = TestRunner();
+    test_runner.test(&test_mat_vec_mult, "matrix vector multiplication.");
+    test_runner.test(&test_residual_calculation, "calcResidual method.");
     test_runner.test(&test_check_dimensions_matching, "checkDimensions for matching matrices.");
     test_runner.test(&test_check_dimensions_not_matching, "checkDimensions for non-matching matrices.");
     test_runner.test(&test_sparse_matmatmult_4x4, "sparse matMatMult for two sparse 4x4 matrices.");
