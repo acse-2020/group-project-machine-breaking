@@ -149,23 +149,25 @@ bool test_dense_jacobi_and_gauss_seidl()
     return !j_res && !gs_res;
 }
 
-bool test_sparse_jacobi()
+// Sparse Jacobi and Gauss-Seidel
+bool test_sparse_stationary_iterative()
 {
-    int size = 4;
+    int size = 6;
     double tol = 1e-6;
     int it_max = 1000;
-    int nnzs = 4;
+    int nnzs = 12;
 
-    std::shared_ptr<int[]> init_row_position(new int[size + 1]{0, 1, 2, 3, 4});
-    std::shared_ptr<int[]> init_col_index(new int[nnzs]{0, 1, 2, 3});
-    std::shared_ptr<double[]> init_sparse_values(new double[nnzs]{2, 1, 3, 7});
+    std::shared_ptr<double[]> init_sparse_values(new double[size * size]{5., 1., 1., 1., 5., 1., 5., 1., 5., 1., 5., 5.});
+    std::shared_ptr<int[]> init_row_position(new int[size * size]{0, 4, 5, 7, 9, 11, 12});
+    std::shared_ptr<int[]> init_col_index(new int[size * size]{0, 2, 3, 4, 1, 0, 2, 0, 3, 0, 4, 5});
 
-    std::vector<double> b = {6.4, 7.8, 56.7, 51.1};
-    std::vector<double> x(size, 0);
+    std::vector<double> b = {17., 10., 16., 21., 26., 30.};
 
     CSRMatrix<double> sparse_matrix = CSRMatrix<double>(size, size, nnzs, init_sparse_values, init_row_position, init_col_index);
     SparseSolver<double> sparse_solver = SparseSolver<double>(sparse_matrix, b);
+    std::vector<double> x(size, 0);
 
+    // JACOBI
     auto t1 = std::chrono::high_resolution_clock::now();
     sparse_solver.stationaryIterative(x, tol, it_max, false);
     auto t2 = std::chrono::high_resolution_clock::now();
@@ -181,6 +183,23 @@ bool test_sparse_jacobi()
     if (sparse_solver.residualCalc(x, b_estimate) > 1e-6)
     {
         TestRunner::testError("Sparse Jacobi residual is above 1e-6");
+        return false;
+    }
+
+    // GAUSS SEIDEL
+    t1 = std::chrono::high_resolution_clock::now();
+    sparse_solver.stationaryIterative(x, tol, it_max, true);
+    t2 = std::chrono::high_resolution_clock::now();
+
+    duration = std::chrono::duration<double>(t2 - t1).count();
+    std::cout << "Time taken for sparse Gauss-Seidel: " << duration << " s " << std::endl
+              << std::endl;
+
+    printVector(x);
+
+    if (sparse_solver.residualCalc(x, b_estimate) > 1e-6)
+    {
+        TestRunner::testError("Sparse Gauss Seidel residual is above 1e-6");
         return false;
     }
 
@@ -292,7 +311,7 @@ void run_tests()
     test_runner.test(&test_sparse_matmatmult_5x5, "sparse matMatMult for multiplying a 5x5 sparse matrix by itself.");
     test_runner.test(&test_dense_jacobi_and_gauss_seidl, "stationaryIterative: dense Jacobi and Gauss-Seidel solver for 4x4 matrix.");
     test_runner.test(&test_lu_dense, "dense LU solver for 4x4 matrix.");
-    test_runner.test(&test_sparse_jacobi, "sparse Jacobi solver for 4x4 matrix.");
+    test_runner.test(&test_sparse_stationary_iterative, "sparse Jacobi solver for 4x4 matrix.");
     test_runner.test(&test_sparse_CG, "sparse conjugate gradient solver for 4x4 matrix.");
     test_runner.test(&test_lu_dense_random, "dense LU with random matrix of size 100x100.");
 }
