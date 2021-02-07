@@ -62,16 +62,16 @@ Solver<T>::~Solver()
 }
 
 template <class T>
-T Solver<T>::residualCalc(std::vector<T> &x, std::vector<T> &b_estimate)
+T Solver<T>::residualCalc(std::vector<T> &x, std::vector<T> &output_b)
 {
     T residual = 0;
     // A x = b(estimate)
-    A.matVecMult(x, b_estimate);
+    A.matVecMult(x, output_b);
 
     // Find the norm between old value and new guess
     for (int i = 0; i < A.rows; i++)
     {
-        residual += pow(b_estimate[i] - b[i], 2.0);
+        residual += pow(output_b[i] - b[i], 2.0);
     }
     return sqrt(residual);
 }
@@ -84,7 +84,7 @@ void Solver<T>::stationaryIterative(std::vector<T> &x, double &tol, int &it_max,
     T sum;
 
     // Initialise vector for row-matrix multiplication
-    std::vector<T> b_estimate(x.size(), 0);
+    std::vector<T> output_b(x.size(), 0);
 
     // vector for storing previous iteration if necessary
     std::vector<T> x_old;
@@ -127,7 +127,7 @@ void Solver<T>::stationaryIterative(std::vector<T> &x, double &tol, int &it_max,
         }
 
         // Call residual calculation method
-        residual = residualCalc(x, b_estimate);
+        residual = residualCalc(x, output_b);
 
         // End iterations if tolerance convergence is reached
         if (residual < tol)

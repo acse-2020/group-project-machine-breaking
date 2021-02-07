@@ -25,16 +25,16 @@ SparseSolver<T>::~SparseSolver()
 }
 
 template <class T>
-T SparseSolver<T>::residualCalc(std::vector<T> &x, std::vector<T> &b_estimate)
+T SparseSolver<T>::residualCalc(std::vector<T> &x, std::vector<T> &output_b)
 {
     T residual = 0;
     // A x = b(estimate)
-    A.matVecMult(x, b_estimate);
+    A.matVecMult(x, output_b);
 
     // Find the norm between old value and new guess
     for (int i = 0; i < A.rows; i++)
     {
-        residual += pow(b_estimate[i] - b[i], 2.0);
+        residual += pow(output_b[i] - b[i], 2.0);
     }
     return sqrt(residual);
 }
@@ -44,7 +44,7 @@ template <class T>
 void SparseSolver<T>::stationaryIterative(std::vector<T> &x, double &tol, int &it_max, bool isGaussSeidel)
 {
     double residual;
-    std::vector<T> b_estimate(x.size(), 0);
+    std::vector<T> output_b(x.size(), 0);
 
     // vector for storing previous iteration if necessary
     std::vector<T> x_old;
@@ -96,7 +96,7 @@ void SparseSolver<T>::stationaryIterative(std::vector<T> &x, double &tol, int &i
         }
 
         // Call residual calculation method
-        residual = residualCalc(x, b_estimate);
+        residual = residualCalc(x, output_b);
 
         if (residual < tol)
         {
@@ -119,12 +119,10 @@ void SparseSolver<T>::stationaryIterative(std::vector<T> &x, double &tol, int &i
 template <class T>
 void SparseSolver<T>::conjugateGradient(std::vector<T> &x, double &tol, int &it_max)
 {
-    // TODO: check diagonal dominance
-    // TODO: add more comments
     double residual;
     double alpha;
     double beta;
-    std::vector<T> b_estimate(x.size(), 0);
+    std::vector<T> output_b(x.size(), 0);
     std::vector<T> residue_vec(x.size(), 0);
     std::vector<T> p(x.size(), 0);
     std::vector<T> Ap_product(x.size(), 0);
