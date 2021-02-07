@@ -403,12 +403,13 @@ number of non-zero elements.
     {
         std::cout << LU->col_index[i] << " ";
     }
-    std::cout << std::endl;
+    std::cout << std::endl << LU->nnzs << std::endl;
     for (int i = 0; i < LU->nnzs; i++)
     {
         std::cout << LU->values[i] << " ";
     }
     std::cout << std::endl;
+
 
     return LU;
 }

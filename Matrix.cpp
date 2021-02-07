@@ -1,4 +1,3 @@
-// #pragma once
 #include <iostream>
 #include "Matrix.h"
 #include <math.h>

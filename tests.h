@@ -302,7 +302,7 @@ bool test_lu_dense_random()
     // if (solver->residualCalc(x, b_estimate) > 1e-6)
     // {
     //     TestRunner::testError("LU residual is above 1e-6");
-    //     return false;
+     return false;
     // }
 }
 
@@ -323,8 +323,8 @@ bool test_sparse_lu()
     SparseSolver<double> sparse_solver = SparseSolver<double>(sparse_matrix, b);
     std::vector<double> x(size, 0);
 
-    std::shared_ptr<CSRMatrix<double>> LU = sparse_solver.lu_decomp();
-    sparse_solver.lu_solve(*LU, perm, x);
+    auto LU = sparse_solver.lu_decomp();
+    //sparse_solver.lu_solve(*LU, perm, x);
 
     double expected[] = {1, 2, 3, 4, 5, 6};
 
@@ -343,7 +343,7 @@ bool test_sparse_lu()
 void run_tests()
 {
     TestRunner test_runner = TestRunner();
-
+    /*
     test_runner.test(&test_check_dimensions_matching, "checkDimensions for matching matrices.");
     test_runner.test(&test_check_dimensions_not_matching, "checkDimensions for non-matching matrices.");
     test_runner.test(&test_sparse_matmatmult_4x4, "sparse matMatMult for two sparse 4x4 matrices.");
@@ -353,5 +353,7 @@ void run_tests()
     test_runner.test(&test_sparse_jacobi, "sparse Jacobi solver for 4x4 matrix.");
     test_runner.test(&test_sparse_CG, "sparse conjugate gradient solver for 4x4 matrix.");
     test_runner.test(&test_lu_dense_random, "dense LU with random matrices.");
+    */
     test_runner.test(&test_sparse_lu, "sparse LU decomposition.");
+    
 }

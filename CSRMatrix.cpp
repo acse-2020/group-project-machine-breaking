@@ -2,6 +2,13 @@
 #include "CSRMatrix.h"
 #include <algorithm>
 
+// Default constructor - creates emmpty matrix
+template <class T>
+CSRMatrix<T>::CSRMatrix()
+{
+}
+
+// Constructor
 template <class T>
 CSRMatrix<T>::CSRMatrix(int rows, int cols, int nnzs, bool preallocate) : Matrix<T>(rows, cols, false), nnzs(nnzs)
 {
@@ -19,11 +26,60 @@ CSRMatrix<T>::CSRMatrix(int rows, int cols, int nnzs, bool preallocate) : Matrix
     }
 }
 
+// Constructor
 template <class T>
 //CSRMatrix<T>::CSRMatrix(int rows, int cols, int nnzs, T *values_ptr, int *row_pos, int *col_ind) : Matrix<T>(rows, cols, values_ptr), nnzs(nnzs), row_position(row_pos), col_index(col_ind)
 CSRMatrix<T>::CSRMatrix(int rows, int cols, int nnzs, std::shared_ptr<T[]> values_ptr, std::shared_ptr<int[]> row_pos, std::shared_ptr<int[]> col_ind)
     : Matrix<T>(rows, cols, values_ptr), nnzs(nnzs), row_position(row_pos), col_index(col_ind)
 {
+}
+
+// Copy constructor
+template <class T>
+CSRMatrix<T>::CSRMatrix(const CSRMatrix<T>& M2)
+{
+    rows = M2.rows;
+    cols = M2.cols;
+    nnzs = M2.nnzs;
+    values = std::shared_ptr<T[]>(new T[nnzs]);
+    row_position = std::shared_ptr<int[]>(new int[rows + 1]);
+    col_index = std::shared_ptr<int[]>(new int[nnzs]);
+    for (int i = 0; i < nnzs; i++)
+    {
+        values[i] = M2.values[i];
+        col_index[i] = M2.col_index[i];
+    }
+    for (int i = 0; i < rows + 1; i++)
+    {
+        row_position[i] = M2.row_position[i];
+    }
+    preallocated = true;
+}
+
+// Copy constructor - overloading the assignement operator
+template <class T>
+CSRMatrix<T>& CSRMatrix<T>::operator=(const CSRMatrix<T>& M2)
+{
+    // self-assignment check
+    if (this == &M2)
+        return *this;
+    rows = M2.rows;
+    cols = M2.cols;
+    nnzs = M2.nnzs;
+    values = std::shared_ptr<T[]>(new T[this->nnzs]);
+    row_position = std::shared_ptr<int[]>(new int[this->rows + 1]);
+    col_index = std::shared_ptr<int[]>(new int[this->nnzs]);
+    for (int i = 0; i < nnzs; i++)
+    {
+        values[i] = M2.values[i];
+        col_index[i] = M2.col_index[i];
+    }
+    for (int i = 0; i < rows + 1; i++)
+    {
+        row_position[i] = M2.row_position[i];
+    }
+    preallocated = true;
+    return *this;
 }
 
 template <class T>
@@ -104,12 +160,13 @@ void CSRMatrix<T>::matVecMult(std::vector<T> &input, std::vector<T> &output)
 
 // populate the row_pos and col_ind vectors
 template <class T>
-std::shared_ptr<CSRMatrix<T>> CSRMatrix<T>::matMatMultSymbolic(const CSRMatrix<T> &mat_right)
+std::shared_ptr<CSRMatrix<T>> CSRMatrix<T>::matMatMultSymbolic(CSRMatrix<T>& mat_right)
 {
-    std::vector<int> col_ind{};
-    std::shared_ptr<int[]> row_pos(new int[this->rows + 1]{});
-    //    row_pos.reserve(this->rows + 1);
-    // row_pos.push_back(0);
+    std::vector<int> col_ind;
+    std::vector<int> row_pos(this->rows + 1, 0);
+    //std::shared_ptr<int[]> row_pos(new int[this->rows + 1]);
+    //row_pos.reserve(this->rows + 1);
+    //row_pos.push_back(0);
     row_pos[0] = 0;
 
     // loop over rows of A
@@ -152,8 +209,9 @@ std::shared_ptr<CSRMatrix<T>> CSRMatrix<T>::matMatMultSymbolic(const CSRMatrix<T
     }
 
     int new_nnzs = col_ind.size();
-    std::shared_ptr<int[]> col_ind_ptr(new int[new_nnzs]{});
-    std::shared_ptr<T[]> values_ptr(new T[new_nnzs]{});
+    /*
+    std::shared_ptr<int[]> col_ind_ptr(new int[new_nnzs]);
+    std::shared_ptr<T[]> values_ptr(new T[new_nnzs]);
 
     for (int i = 0; i < new_nnzs; i++)
     {
@@ -162,7 +220,19 @@ std::shared_ptr<CSRMatrix<T>> CSRMatrix<T>::matMatMultSymbolic(const CSRMatrix<T
     }
 
     std::shared_ptr<CSRMatrix<T>> result(new CSRMatrix<T>(this->rows, mat_right.cols, new_nnzs, values_ptr, row_pos, col_ind_ptr));
+    */
+    std::shared_ptr<CSRMatrix<T>> result(new CSRMatrix<T>(this->rows, mat_right.cols, new_nnzs, true));
 
+    for (int i = 0; i < new_nnzs; i++)
+    {
+        result->col_index[i] = col_ind[i];
+        result->values[i] = 0;
+    }
+    for (int i = 0; i < this->rows + 1; i++)
+    {
+        result->row_position[i] = row_pos[i];
+    }
+    
     return result;
 }
 
@@ -246,5 +316,6 @@ std::shared_ptr<CSRMatrix<T>> CSRMatrix<T>::matMatMult(CSRMatrix<T> &mat_right)
     {
         result->values[i] = output_all_values[i];
     }
+
     return result;
 }

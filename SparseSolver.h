@@ -3,6 +3,7 @@
 #include "CSRMatrix.h"
 #include <vector>
 #include <memory>
+
 template <class T>
 class SparseSolver
 {
