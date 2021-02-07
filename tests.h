@@ -122,14 +122,16 @@ bool test_dense_jacobi_and_gauss_seidl()
     auto t2 = std::chrono::high_resolution_clock::now();
 
     auto duration = std::chrono::duration<double>(t2 - t1).count();
-    std::cout << "Time taken for Jacobi: " << duration << " s " << std::endl << std::endl;
+    std::cout << "Time taken for Jacobi: " << duration << " s " << std::endl
+              << std::endl;
 
     t1 = std::chrono::high_resolution_clock::now();
     dense_solver.stationaryIterative(x_gs, tol, it_max, true);
     t2 = std::chrono::high_resolution_clock::now();
 
     duration = std::chrono::duration<double>(t2 - t1).count();
-    std::cout << "Time taken for Gauss Seidel: " << duration << " s " << std::endl << std::endl;
+    std::cout << "Time taken for Gauss Seidel: " << duration << " s " << std::endl
+              << std::endl;
 
     std::vector<double> b_estimate(size, 0);
 
@@ -169,10 +171,11 @@ bool test_sparse_jacobi()
     auto t2 = std::chrono::high_resolution_clock::now();
 
     auto duration = std::chrono::duration<double>(t2 - t1).count();
-    std::cout << "Time taken for sparse Jacobi: " << duration << " s " << std::endl << std::endl;
+    std::cout << "Time taken for sparse Jacobi: " << duration << " s " << std::endl
+              << std::endl;
 
     std::vector<double> b_estimate(size, 0);
-    
+
     printVector(x);
 
     if (sparse_solver.residualCalc(x, b_estimate) > 1e-6)
@@ -204,9 +207,10 @@ bool test_sparse_CG()
     auto t1 = std::chrono::high_resolution_clock::now();
     sparse_solver.conjugateGradient(x, tol, it_max);
     auto t2 = std::chrono::high_resolution_clock::now();
-    
+
     auto duration = std::chrono::duration<double>(t2 - t1).count();
-    std::cout << "Time taken for sparse conjugate gradient solver: " << duration << " s " << std::endl << std::endl;
+    std::cout << "Time taken for sparse conjugate gradient solver: " << duration << " s " << std::endl
+              << std::endl;
 
     std::vector<double> b_estimate(size, 0);
 
@@ -240,7 +244,8 @@ bool test_lu_dense()
     auto t2 = std::chrono::high_resolution_clock::now();
 
     auto duration = std::chrono::duration<double>(t2 - t1).count();
-    std::cout << "Time taken for LU: " << duration << " s " << std::endl << std::endl;
+    std::cout << "Time taken for LU: " << duration << " s " << std::endl
+              << std::endl;
 
     if (dense_solver.residualCalc(x, b_estimate) > 1e-6)
     {
@@ -267,12 +272,13 @@ bool test_lu_dense_random()
     auto t2 = std::chrono::high_resolution_clock::now();
 
     auto duration = std::chrono::duration<double>(t2 - t1).count();
-    std::cout << "Time taken for LU: " << duration << " s " << std::endl << std::endl;
+    std::cout << "Time taken for LU: " << duration << " s " << std::endl
+              << std::endl;
 
     if (solver.residualCalc(x, b_estimate) > 1e-6)
     {
-         TestRunner::testError("LU residual is above 1e-6");
-         return false;
+        TestRunner::testError("LU residual is above 1e-6");
+        return false;
     }
     return true;
 }
