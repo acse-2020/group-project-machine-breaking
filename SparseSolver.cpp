@@ -232,7 +232,6 @@ number of non-zero elements.
             throw std::invalid_argument("Matrix is singular");
         scaling[i] = 1.0 / max;
     }
-    printVector(scaling);
 
     bool matching = false;
 
@@ -283,24 +282,6 @@ number of non-zero elements.
 
         matching = true;
     }
-
-    std::cout << "BEFORE " << std::endl;
-    for (int i = 0; i < 7; i++)
-    {
-        std::cout << LU->row_position[i] << " ";
-    }
-    std::cout << std::endl;
-
-    for (int i = 0; i < LU->nnzs; i++)
-    {
-        std::cout << LU->col_index[i] << " ";
-    }
-    std::cout << std::endl;
-    for (int i = 0; i < LU->nnzs; i++)
-    {
-        std::cout << LU->values[i] << " ";
-    }
-    std::cout << std::endl;
 
     // the lower and upper triangular matrix values are stored in the LU matrix
     // loop over rows of LU
@@ -364,7 +345,7 @@ number of non-zero elements.
             if (col >= row)
             {
                 // this means that we are in the upper triangle or the diagonal (U)
-                LU->values[row * LU->cols + col] = a_ij - valsum;
+                LU->values[cii] = a_ij - valsum;
             }
             else if (col < row)
             {
@@ -384,32 +365,13 @@ number of non-zero elements.
 
                 if (b_jj == 0)
                 {
-                    std::cout << "Error: b_jj is zero" << std::endl;
+                    std::cerr << "Error: b_jj is zero" << std::endl;
                 }
 
-                LU->values[row * LU->cols + col] = (1.0 / b_jj) * (a_ij - valsum);
+                LU->values[cii] = (1.0 / b_jj) * (a_ij - valsum);
             }
         }
     }
-
-    std::cout << "END " << std::endl;
-    for (int i = 0; i < 7; i++)
-    {
-        std::cout << LU->row_position[i] << " ";
-    }
-    std::cout << std::endl;
-
-    for (int i = 0; i < LU->nnzs; i++)
-    {
-        std::cout << LU->col_index[i] << " ";
-    }
-    std::cout << std::endl << LU->nnzs << std::endl;
-    for (int i = 0; i < LU->nnzs; i++)
-    {
-        std::cout << LU->values[i] << " ";
-    }
-    std::cout << std::endl;
-
 
     return LU;
 }
