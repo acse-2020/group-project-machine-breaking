@@ -7,9 +7,19 @@ template <class T>
 class CSRMatrix : public Matrix<T>
 {
 public:
+    // default constructor
+    CSRMatrix(void);
+
+    // Constructor
     CSRMatrix(int rows, int cols, int nnzs, bool preallocate);
 
+    //Constructor
     CSRMatrix(int rows, int cols, int nnzs, std::shared_ptr<T[]> values_ptr, std::shared_ptr<int[]> row_pos, std::shared_ptr<int[]> col_ind);
+
+    // Copy constructor
+    CSRMatrix(const CSRMatrix<T>& M2);
+
+    CSRMatrix<T> &operator=(const CSRMatrix<T> &M2);
 
     ~CSRMatrix();
 
@@ -20,6 +30,7 @@ public:
     void matVecMult(std::vector<T> &input, std::vector<T> &output);
 
     std::shared_ptr<CSRMatrix<T>> matMatMult(CSRMatrix<T> &mat_right);
+    std::shared_ptr<CSRMatrix<T>> matMatMultSymbolic(CSRMatrix<T> &mat_right);
 
     CSRMatrix<T> cholesky();
     std::shared_ptr<CSRMatrix<T>> transpose();

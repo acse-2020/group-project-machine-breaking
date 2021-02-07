@@ -13,6 +13,7 @@
 #include "SparseSolver.cpp"
 #include "TestRunner.h"
 #include "utilities.h"
+#include <memory>
 
 // test functions should start with 'test_' prefix
 bool test_sparse_matmatmult_5x5()
@@ -302,9 +303,9 @@ bool test_lu_dense_random()
     return true;
 }
 
+
 bool test_cholesky()
 {
-
     // int nnzs = 26;
     // int init_row_position1[] = {0, 3, 6, 9, 13, 17, 20, 22, 26};
     // int init_col_index1[] = {0, 4, 7, 1, 3, 4, 2, 3, 7, 1, 2, 3, 6, 0, 1, 4, 5, 4, 5, 7, 3, 6, 0, 2, 5, 7};
@@ -375,6 +376,39 @@ bool test_cholesky()
     return true;
 }
 
+bool test_sparse_lu()
+{
+    int size = 6;
+    int nnzs = 12;
+
+    std::shared_ptr<double[]> init_sparse_values(new double[size * size]{5., 1., 1., 1., 5., 1., 5., 1., 5., 1., 5., 5.});
+    std::shared_ptr<int[]> init_row_position(new int[size * size]{0, 4, 5, 7, 9, 11, 12});
+    std::shared_ptr<int[]> init_col_index(new int[size * size]{0, 2, 3, 4, 1, 0, 2, 0, 3, 0, 4, 5});
+
+    std::vector<double> b = {17., 10., 16., 21., 26., 30.};
+    std::vector<int> perm = {0, 1, 2, 3, 4, 5};
+
+    CSRMatrix<double> sparse_matrix = CSRMatrix<double>(size, size, nnzs, init_sparse_values, init_row_position, init_col_index);
+    SparseSolver<double> sparse_solver = SparseSolver<double>(sparse_matrix, b);
+    std::vector<double> x(size, 0);
+
+    auto LU = sparse_solver.lu_decomp();
+    sparse_solver.lu_solve(*LU, perm, x);
+
+    double expected[] = {1, 2, 3, 4, 5, 6};
+
+    for (int i = 0; i < size; i++)
+    {
+        if (expected[i] != x[i])
+        {
+            std::cout << expected[i] << " does not match " << x[i] << std::endl;
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void run_tests()
 {
     TestRunner test_runner = TestRunner();
@@ -386,6 +420,7 @@ void run_tests()
     test_runner.test(&test_lu_dense, "dense LU solver for 4x4 matrix.");
     test_runner.test(&test_sparse_stationary_iterative, "sparse Jacobi solver for 4x4 matrix.");
     test_runner.test(&test_sparse_CG, "sparse conjugate gradient solver for 4x4 matrix.");
-    test_runner.test(&test_lu_dense_random, "dense LU with random matrix of size 100x100.");
+    test_runner.test(&test_lu_dense_random, "dense LU with random matrices.");
+    test_runner.test(&test_sparse_lu, "sparse LU decomposition.");
     test_runner.test(&test_cholesky, "Cholesky method.");
 }

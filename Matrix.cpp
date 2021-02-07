@@ -1,4 +1,3 @@
-// #pragma once
 #include <iostream>
 #include "Matrix.h"
 #include <math.h>
@@ -19,7 +18,7 @@ Matrix<T>::Matrix(int rows, int cols, bool preallocate) : rows(rows), cols(cols)
 // Constructor - now just setting the value of our pointer
 template <class T>
 //Matrix<T>::Matrix(int rows, int cols, T *values_ptr) : rows(rows), cols(cols), size_of_values(rows * cols), values(values_ptr)
-Matrix<T>::Matrix(int rows, int cols, std::shared_ptr<T[]> &values_ptr) : rows(rows), cols(cols), size_of_values(rows * cols), values(values_ptr)
+Matrix<T>::Matrix(int rows, int cols, std::shared_ptr<T[]> values_ptr) : rows(rows), cols(cols), size_of_values(rows * cols), values(values_ptr)
 {
 }
 
@@ -142,7 +141,8 @@ void Matrix<T>::matMatMult(Matrix &mat_right, Matrix &output)
     // The output hasn't been preallocated, so we are going to do that
     else
     {
-        output.values = new T[this->rows * mat_right.cols];
+        std::shared_ptr<T[]> vals(new T[this->rows * mat_right.cols]);
+        output.values = vals;
         output.preallocated = true;
     }
 
