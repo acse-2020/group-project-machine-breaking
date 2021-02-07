@@ -84,6 +84,61 @@ void CSRMatrix<T>::print2DMatrix()
 }
 
 template <class T>
+std::shared_ptr<CSRMatrix<T> > CSRMatrix<T>::transpose()
+{
+    // TO DO: comment
+    std::vector<T> t_values;
+    std::vector<int> t_cols;
+    std::vector<int> t_rows;
+
+    // First element in row vector will always be 0
+    t_rows.push_back(0);
+
+    // Note that outer loop is cols as there will be as many rows
+    // in transposed matrix as columns in the original one
+    for (int i = 0; i < this->cols; i++)
+    {
+        std::vector<int> cols_nnzs{};
+        int k = 0;
+        for (int c = 0; c < nnzs; c++)
+        {
+            // Store values and column indices on column i,
+            // which corresponds to row i in transposed matrix
+            if (i == col_index[c])
+            {
+                cols_nnzs.push_back(i);
+                t_values.push_back(this->values[c]);
+                for (int k = 0; k < this->rows; k++)
+                    if (c >= row_position[k] && c < row_position[k + 1])
+                    {
+                        t_cols.push_back(k);
+                    }
+            }
+        }
+        // Store row position incrementally based on number of nnzs in row
+        t_rows.push_back(cols_nnzs.size() + t_rows.back());
+    }
+
+    // Construct transposed matrix
+    std::shared_ptr<CSRMatrix<T> > t_Matrix(new CSRMatrix<T>(this->rows, this->rows, nnzs, true));
+
+    for (int i = 0; i < t_cols.size(); i++)
+    {
+        t_Matrix->col_index[i] = t_cols[i];
+    }
+    for (int i = 0; i < t_rows.size(); i++)
+    {
+        t_Matrix->row_position[i] = t_rows[i];
+    }
+    for (int i = 0; i < t_values.size(); i++)
+    {
+        t_Matrix->values[i] = t_values[i];
+    }
+
+    return t_Matrix;
+}
+
+template <class T>
 void CSRMatrix<T>::matVecMult(std::vector<T> &input, std::vector<T> &output)
 {
     // TODO: check the sizes
@@ -103,7 +158,7 @@ void CSRMatrix<T>::matVecMult(std::vector<T> &input, std::vector<T> &output)
 }
 
 template <class T>
-std::shared_ptr<CSRMatrix<T>> CSRMatrix<T>::matMatMult(CSRMatrix<T> &mat_right)
+std::shared_ptr<CSRMatrix<T> > CSRMatrix<T>::matMatMult(CSRMatrix<T> &mat_right)
 {
     // for now, we assume output has been preallocated
     std::vector<T> output_all_values{};
@@ -168,13 +223,7 @@ std::shared_ptr<CSRMatrix<T>> CSRMatrix<T>::matMatMult(CSRMatrix<T> &mat_right)
         }
     }
 
-    //(int rows, int cols, int nnzs, T *values_ptr, int *row_pos, int *col_ind) : Matrix<T>(rows, cols, values_ptr), nnzs(nnzs), row_position(row_pos), col_index(col_ind)
-
-    int init_row_position[] = {0, 1, 2, 3, 4};
-    int init_col_index[] = {0, 1, 2, 3};
-    double init_sparse_values[] = {2, 1, 3, 7};
-
-    std::shared_ptr<CSRMatrix<T>> result(new CSRMatrix<T>(this->rows, mat_right.cols, output_cols.size(), true));
+    std::shared_ptr<CSRMatrix<T> > result(new CSRMatrix<T>(this->rows, mat_right.cols, output_cols.size(), true));
 
     for (int i = 0; i < output_cols.size(); i++)
     {
