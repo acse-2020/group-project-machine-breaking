@@ -24,7 +24,12 @@ Solver<T>::Solver(Matrix<T> &A, std::vector<T> &b) : A(A), b(b)
 template <class T>
 Solver<T>::Solver(int size) : size(size)
 {
+    // Set random seed
+    srand(time(NULL));
+
     // create random diagonally dominant matrices
+    A = Matrix<T>(size, size, true);
+    b.reserve(size);
     for (int i = 0; i < size; i++)
     {
         b.push_back(T(rand() % 10 + 1));

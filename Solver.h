@@ -14,7 +14,7 @@ public:
     // constructor
     Solver(Matrix<T> &A, std::vector<T> &b);
 
-    // constructor - creats a random matrix of size nxn
+    // constructor - creats a random matrix of dimensions sizexsize
     Solver(int size);
 
     // Copy constructor
