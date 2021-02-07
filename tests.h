@@ -1,6 +1,6 @@
 #include <iostream>
 #include <math.h>
-#include <ctime>
+#include <chrono>
 #include <vector>
 #include <memory>
 #include "Matrix.h"
@@ -118,18 +118,20 @@ bool test_dense_jacobi_and_gauss_seidl()
     std::vector<double> x_j(size, 0);
     std::vector<double> x_gs(size, 0);
 
-    clock_t t = clock();
+    auto t1 = std::chrono::high_resolution_clock::now();
     dense_solver.stationaryIterative(x_j, tol, it_max, false);
-    t = clock() - t;
+    auto t2 = std::chrono::high_resolution_clock::now();
 
-    std::cout << "Time taken for Jacobi: " << ((float)t) / CLOCKS_PER_SEC << std::endl
+    auto duration = std::chrono::duration<double>(t2 - t1).count();
+    std::cout << "Time taken for Jacobi: " << duration << " s " << std::endl
               << std::endl;
 
-    t = clock();
+    t1 = std::chrono::high_resolution_clock::now();
     dense_solver.stationaryIterative(x_gs, tol, it_max, true);
-    t = clock() - t;
+    t2 = std::chrono::high_resolution_clock::now();
 
-    std::cout << "Time taken for Gauss Seidel: " << ((float)t) / CLOCKS_PER_SEC << std::endl
+    duration = std::chrono::duration<double>(t2 - t1).count();
+    std::cout << "Time taken for Gauss Seidel: " << duration << " s " << std::endl
               << std::endl;
 
     std::vector<double> b_estimate(size, 0);
@@ -148,37 +150,57 @@ bool test_dense_jacobi_and_gauss_seidl()
     return !j_res && !gs_res;
 }
 
-bool test_sparse_jacobi()
+// Sparse Jacobi and Gauss-Seidel
+bool test_sparse_stationary_iterative()
 {
-    int size = 4;
+    int size = 6;
     double tol = 1e-6;
     int it_max = 1000;
-    int nnzs = 4;
+    int nnzs = 12;
 
-    std::shared_ptr<int[]> init_row_position(new int[size + 1]{0, 1, 2, 3, 4});
-    std::shared_ptr<int[]> init_col_index(new int[nnzs]{0, 1, 2, 3});
-    std::shared_ptr<double[]> init_sparse_values(new double[nnzs]{2, 1, 3, 7});
+    std::shared_ptr<double[]> init_sparse_values(new double[size * size]{5., 1., 1., 1., 5., 1., 5., 1., 5., 1., 5., 5.});
+    std::shared_ptr<int[]> init_row_position(new int[size * size]{0, 4, 5, 7, 9, 11, 12});
+    std::shared_ptr<int[]> init_col_index(new int[size * size]{0, 2, 3, 4, 1, 0, 2, 0, 3, 0, 4, 5});
 
-    std::vector<double> b = {6.4, 7.8, 56.7, 51.1};
-    std::vector<double> x(size, 0);
+    std::vector<double> b = {17., 10., 16., 21., 26., 30.};
 
     CSRMatrix<double> sparse_matrix = CSRMatrix<double>(size, size, nnzs, init_sparse_values, init_row_position, init_col_index);
     SparseSolver<double> sparse_solver = SparseSolver<double>(sparse_matrix, b);
+    std::vector<double> x(size, 0);
 
-    clock_t t = clock();
-
+    // JACOBI
+    auto t1 = std::chrono::high_resolution_clock::now();
     sparse_solver.stationaryIterative(x, tol, it_max, false);
+    auto t2 = std::chrono::high_resolution_clock::now();
 
-    t = clock() - t;
-
-    std::cout << "Time taken for sparse Jacobi: " << ((float)t) / CLOCKS_PER_SEC << std::endl
+    auto duration = std::chrono::duration<double>(t2 - t1).count();
+    std::cout << "Time taken for sparse Jacobi: " << duration << " s " << std::endl
               << std::endl;
 
     std::vector<double> b_estimate(size, 0);
 
+    printVector(x);
+
     if (sparse_solver.residualCalc(x, b_estimate) > 1e-6)
     {
         TestRunner::testError("Sparse Jacobi residual is above 1e-6");
+        return false;
+    }
+
+    // GAUSS SEIDEL
+    t1 = std::chrono::high_resolution_clock::now();
+    sparse_solver.stationaryIterative(x, tol, it_max, true);
+    t2 = std::chrono::high_resolution_clock::now();
+
+    duration = std::chrono::duration<double>(t2 - t1).count();
+    std::cout << "Time taken for sparse Gauss-Seidel: " << duration << " s " << std::endl
+              << std::endl;
+
+    printVector(x);
+
+    if (sparse_solver.residualCalc(x, b_estimate) > 1e-6)
+    {
+        TestRunner::testError("Sparse Gauss Seidel residual is above 1e-6");
         return false;
     }
 
@@ -202,13 +224,12 @@ bool test_sparse_CG()
     CSRMatrix<double> sparse_matrix = CSRMatrix<double>(size, size, nnzs, init_sparse_values, init_row_position, init_col_index);
     SparseSolver<double> sparse_solver = SparseSolver<double>(sparse_matrix, b);
 
-    clock_t t = clock();
-
+    auto t1 = std::chrono::high_resolution_clock::now();
     sparse_solver.conjugateGradient(x, tol, it_max);
+    auto t2 = std::chrono::high_resolution_clock::now();
 
-    t = clock() - t;
-
-    std::cout << "Time taken for sparse conjugate gradient solver: " << ((float)t) / CLOCKS_PER_SEC << std::endl
+    auto duration = std::chrono::duration<double>(t2 - t1).count();
+    std::cout << "Time taken for sparse conjugate gradient solver: " << duration << " s " << std::endl
               << std::endl;
 
     std::vector<double> b_estimate(size, 0);
@@ -226,6 +247,7 @@ bool test_lu_dense()
 {
     int size = 4;
     std::vector<double> x(size, 0);
+    std::vector<double> b_estimate(size, 0);
 
     std::shared_ptr<double[]> init_dense_values(new double[size * size]{10., 2., 3., 5., 1., 14., 6., 2., -1., 4., 16., -4, 5., 4., 3., 11.});
 
@@ -236,14 +258,14 @@ bool test_lu_dense()
 
     Matrix<double> LU(size, size, true);
 
-    clock_t t = clock();
+    auto t1 = std::chrono::high_resolution_clock::now();
     std::vector<int> piv = dense_solver.lu_decomp(LU);
     dense_solver.lu_solve(LU, piv, x);
-    t = clock() - t;
+    auto t2 = std::chrono::high_resolution_clock::now();
 
-    std::vector<double> b_estimate(size, 0);
-
-    std::cout << "Time taken for LU: " << ((float)t) / CLOCKS_PER_SEC << std::endl;
+    auto duration = std::chrono::duration<double>(t2 - t1).count();
+    std::cout << "Time taken for LU: " << duration << " s " << std::endl
+              << std::endl;
 
     if (dense_solver.residualCalc(x, b_estimate) > 1e-6)
     {
@@ -256,54 +278,102 @@ bool test_lu_dense()
 
 bool test_lu_dense_random()
 {
-    int size = 4;
+    int size = 100;
     std::vector<double> x(size, 0);
-    // Solver<double> *solver = nullptr;
+    std::vector<double> b_estimate(size, 0);
 
-    //auto *solver = new Solver<double>::makeSolver(size);
+    auto solver = Solver<double>(size);
 
-    //double init_dense_values[] = { 10., 2., 3., 5., 1., 14., 6., 2., -1., 4., 16., -4, 5., 4., 3., 11. };
-    std::shared_ptr<double[]> init_dense_values(new double[size * size]{10., 2., 3., 5., 1., 14., 6., 2., -1., 4., 16., -4, 5., 4., 3., 11.});
-    //std::unique_ptr<double[]> init_dense_values(new double[size * size]);
-    //(10., 2., 3., 5., 1., 14., 6., 2., -1., 4., 16., -4, 5., 4., 3., 11.);
-    //init_dense_values = { 10., 2., 3., 5., 1., 14., 6., 2., -1., 4., 16., -4, 5., 4., 3., 11. };
-    //unique_ptr<A> ptr = unique_ptr<A>(new A(1234));
+    Matrix<double> LU(size, size, true);
 
-    Matrix<double> dense_mat = Matrix<double>(size, size, init_dense_values);
-    //Matrix<double> copy_mat = dense_mat;
-    std::cout << dense_mat.values[0] << " " << &dense_mat.values[0] << std::endl;
-    //std::cout << copy_mat.values[0] << " " << &copy_mat.values[0] << std::endl;
-    std::vector<double> b = {1., 2., 3., 4.};
+    auto t1 = std::chrono::high_resolution_clock::now();
+    std::vector<int> piv = solver.lu_decomp(LU);
+    solver.lu_solve(LU, piv, x);
+    auto t2 = std::chrono::high_resolution_clock::now();
 
-    Solver<double> dense_solver = Solver<double>(dense_mat, b);
-    std::cout << dense_solver.A.values[0] << " " << &dense_solver.A.values[0] << std::endl;
-    Solver<double> solver = dense_solver;
-    std::cout << solver.b[0] << " " << &solver.b[0] << std::endl;
-    std::cout << solver.A.values[0] << " " << &solver.A.values[0] << std::endl;
-    // delete solver;
+    auto duration = std::chrono::duration<double>(t2 - t1).count();
+    std::cout << "Time taken for LU: " << duration << " s " << std::endl
+              << std::endl;
 
-    // create_dense_solver(size, solver);
-    // std::unique_ptr<Solver<double>> solver = solver_factory(size);
-    //std::cout << solver->A.values[0] << std::endl;
+    if (solver.residualCalc(x, b_estimate) > 1e-6)
+    {
+        TestRunner::testError("LU residual is above 1e-6");
+        return false;
+    }
+    return true;
+}
 
-    //delete solver; // why does this not work???
 
-    // Matrix<double> LU(size, size, true);
+bool test_cholesky()
+{
+    // int nnzs = 26;
+    // int init_row_position1[] = {0, 3, 6, 9, 13, 17, 20, 22, 26};
+    // int init_col_index1[] = {0, 4, 7, 1, 3, 4, 2, 3, 7, 1, 2, 3, 6, 0, 1, 4, 5, 4, 5, 7, 3, 6, 0, 2, 5, 7};
+    // double init_sparse_values1[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
-    // clock_t t = clock();
-    // std::vector<int> piv = solver->lu_decomp(LU);
-    // solver->lu_solve(LU, piv, x);
-    // t = clock() - t;
+    // int nnzs = 7;
+    // int init_row_position1[] = {0, 3, 5, 7};
+    // int init_col_index1[] = {0, 1, 2, 0, 1, 0, 2};
+    // double init_sparse_values1[] = {25, 15, -5, 15, 18, -5, 11};
 
-    // std::vector<double> b_estimate(size, 0);
+    // int nnzs = 14;
+    // int init_row_position1[] = {0, 3, 6, 10, 14};
+    // int init_col_index1[] = {0, 2, 3, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
+    // double init_sparse_values1[] = {9, -27, 18, 9, -9, -27, -27, -9, 99, -27, 18, -27, -27, 121};
 
-    // std::cout << "Time taken for LU: " << ((float)t) / CLOCKS_PER_SEC << std::endl;
+    int nnzs = 9;
+    int size = 3;
 
-    // if (solver->residualCalc(x, b_estimate) > 1e-6)
-    // {
-    //     TestRunner::testError("LU residual is above 1e-6");
-    return false;
-    // }
+    std::shared_ptr<int[]> init_row_position1(new int[size + 1]{0, 3, 6, 9});
+    std::shared_ptr<int[]> init_col_index1(new int[nnzs]{0, 1, 2, 0, 1, 2, 0, 1, 2});
+    std::shared_ptr<double[]> init_sparse_values1(new double[nnzs]{6, 15, 55, 15, 55, 225, 55, 225, 979});
+
+    CSRMatrix<double> sparse_matrix1 = CSRMatrix<double>(3, 3, nnzs, init_sparse_values1, init_row_position1, init_col_index1);
+
+    // sparse_matrix1.printMatrix();
+    // sparse_matrix1.print2DMatrix();
+
+    std::vector<double> b(3, 0);
+    // std::cout << "b: ";
+    for (int i = 0; i < b.size(); i++)
+    {
+        b[i] = i + 1;
+        std::cout << " " << b[i] << " ";
+    }
+    // std::cout << "\n";
+
+    // CSRMatrix<double> transposed_M1 = sparse_matrix1.transpose();
+    // transposed_M1.printMatrix();
+    // transposed_M1.print2DMatrix();
+
+    // int init_row_position2[] = {0, 0, 2, 3, 4};
+    // int init_col_index2[] = {0, 2, 3, 2};
+    // double init_sparse_values2[] = {1, 1, 2, 1};
+    // auto sparse_matrix2 = CSRMatrix<double>(4, 4, nnzs, &init_sparse_values2[0], &init_row_position2[0], &init_col_index2[0]);
+    // sparse_matrix2.print2DMatrix();
+
+    // CSRMatrix<double> transposed_M2 = sparse_matrix2.transpose();
+    // transposed_M2.printMatrix();
+    // transposed_M2.print2DMatrix();
+    // CSRMatrix<double> R = CSRMatrix<double>(3, 3, nnzs, &init_sparse_values1[0], &init_row_position1[0], &init_col_index1[0]);
+
+    SparseSolver<double> sparse_solver = SparseSolver<double>(sparse_matrix1, b);
+
+    std::shared_ptr<CSRMatrix<double>> R = sparse_solver.cholesky_decomp();
+    std::vector<double> x(3, 0);
+    sparse_solver.cholesky_solve(*R, x);
+
+    // R->printMatrix();
+    // R->print2DMatrix();
+
+    std::cout << "Result: ";
+    for (int i = 0; i < x.size(); i++)
+    {
+        std::cout << " " << x[i] << " ";
+    }
+    std::cout << "\n";
+
+    return true;
 }
 
 bool test_sparse_lu()
@@ -348,8 +418,9 @@ void run_tests()
     test_runner.test(&test_sparse_matmatmult_5x5, "sparse matMatMult for multiplying a 5x5 sparse matrix by itself.");
     test_runner.test(&test_dense_jacobi_and_gauss_seidl, "stationaryIterative: dense Jacobi and Gauss-Seidel solver for 4x4 matrix.");
     test_runner.test(&test_lu_dense, "dense LU solver for 4x4 matrix.");
-    test_runner.test(&test_sparse_jacobi, "sparse Jacobi solver for 4x4 matrix.");
+    test_runner.test(&test_sparse_stationary_iterative, "sparse Jacobi solver for 4x4 matrix.");
     test_runner.test(&test_sparse_CG, "sparse conjugate gradient solver for 4x4 matrix.");
     test_runner.test(&test_lu_dense_random, "dense LU with random matrices.");
     test_runner.test(&test_sparse_lu, "sparse LU decomposition.");
+    test_runner.test(&test_cholesky, "Cholesky method.");
 }

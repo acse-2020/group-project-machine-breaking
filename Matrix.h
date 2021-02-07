@@ -18,7 +18,8 @@ public:
 
     // Copy constructor
     Matrix(const Matrix<T> &M2);
-
+    
+    // Overload assignment operator to deepcopy
     Matrix<T> &operator=(const Matrix<T> &M2);
 
     // destructor

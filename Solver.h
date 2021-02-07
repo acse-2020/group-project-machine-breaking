@@ -14,20 +14,22 @@ public:
     // constructor
     Solver(Matrix<T> &A, std::vector<T> &b);
 
+    // constructor - creats a random matrix of size nxn
+    Solver(int size);
+
     // Copy constructor
     Solver(const Solver<T> &S2);
 
     // destructor
     virtual ~Solver();
 
-    // factory function
-    Solver<T> makeSolver(int size);
-
-    double residualCalc(std::vector<T> &x, std::vector<T> &b_estimate);
+    T residualCalc(std::vector<T> &x, std::vector<T> &b_estimate);
 
     // Jacobi or Gauss-Seidel
     void stationaryIterative(std::vector<T> &x, double &tol, int &it_max, bool isGaussSeidel);
 
     std::vector<int> lu_decomp(Matrix<T> &LU);
     void lu_solve(Matrix<T> &LU, std::vector<int> &piv, std::vector<T> &x);
+
+    int size = -1;
 };
