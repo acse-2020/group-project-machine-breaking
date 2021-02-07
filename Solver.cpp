@@ -170,7 +170,7 @@ Implicit pivoting used to make it independent of scaling of equations.
     std::vector<int> perm_indx(n); // Store index of permutation
     std::vector<T> scaling(n);     // Store implicit scaling of each row
 
-    // Copy values into LU, want to do this with a copy constryctor later
+    // Copy values into LU, want to do this with a copy constructor later
     for (int i = 0; i < A.size_of_values; i++)
     {
         LU.values[i] = A.values[i];
@@ -236,9 +236,17 @@ Implicit pivoting used to make it independent of scaling of equations.
     return perm_indx;
 }
 
-// Linear solver that uses LU decomposition
+// Linear solver that uses LU decomposition matrix
 template <class T>
 void Solver<T>::lu_solve(Matrix<T> &LU, std::vector<int> &perm_indx, std::vector<T> &x)
+{
+    // if no vector b is passed as an argument we use the class property b
+    this->lu_solve(LU, perm_indx, x, this->b);
+}
+
+// Linear solver that uses LU decomposition matrix
+template <class T>
+void Solver<T>::lu_solve(Matrix<T> &LU, std::vector<int> &perm_indx, std::vector<T> &x, std::vector<T> &b_lu)
 // Solve the equations L*y = b and U*x = y to find x.
 {
     int n, kp, i, j, k;
@@ -252,7 +260,7 @@ void Solver<T>::lu_solve(Matrix<T> &LU, std::vector<int> &perm_indx, std::vector
     // been simplified by combining (b and sum) and (y and sum).
     for (i = 0; i < n; i++)
     {
-        x[i] = b[i];
+        x[i] = b_lu[i];
     }
 
     // Perform forward substitution to solve L*y = b.
