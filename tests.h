@@ -134,14 +134,14 @@ bool test_dense_jacobi_and_gauss_seidl()
     std::cout << "Time taken for Gauss Seidel: " << duration << " s " << std::endl
               << std::endl;
 
-    std::vector<double> b_estimate(size, 0);
+    std::vector<double> output_b(size, 0);
 
     bool j_res, gs_res;
-    if (j_res = dense_solver.residualCalc(x_j, b_estimate) > tol)
+    if (j_res = dense_solver.residualCalc(x_j, output_b) > tol)
     {
         TestRunner::testError("Jacobi residual is above tolerance");
     }
-    if (gs_res = dense_solver.residualCalc(x_gs, b_estimate) > tol)
+    if (gs_res = dense_solver.residualCalc(x_gs, output_b) > tol)
     {
         TestRunner::testError("Gauss-Seidl residual is above tolerance");
     }
@@ -177,11 +177,11 @@ bool test_sparse_stationary_iterative()
     std::cout << "Time taken for sparse Jacobi: " << duration << " s " << std::endl
               << std::endl;
 
-    std::vector<double> b_estimate(size, 0);
+    std::vector<double> output_b(size, 0);
 
     printVector(x);
 
-    if (sparse_solver.residualCalc(x, b_estimate) > 1e-6)
+    if (sparse_solver.residualCalc(x, output_b) > 1e-6)
     {
         TestRunner::testError("Sparse Jacobi residual is above 1e-6");
         return false;
@@ -198,7 +198,7 @@ bool test_sparse_stationary_iterative()
 
     printVector(x);
 
-    if (sparse_solver.residualCalc(x, b_estimate) > 1e-6)
+    if (sparse_solver.residualCalc(x, output_b) > 1e-6)
     {
         TestRunner::testError("Sparse Gauss Seidel residual is above 1e-6");
         return false;
@@ -232,9 +232,9 @@ bool test_sparse_CG()
     std::cout << "Time taken for sparse conjugate gradient solver: " << duration << " s " << std::endl
               << std::endl;
 
-    std::vector<double> b_estimate(size, 0);
+    std::vector<double> output_b(size, 0);
 
-    if (sparse_solver.residualCalc(x, b_estimate) > 1e-6)
+    if (sparse_solver.residualCalc(x, output_b) > 1e-6)
     {
         TestRunner::testError("Sparse CG residual is above 1e-6");
         return false;
@@ -247,7 +247,7 @@ bool test_lu_dense()
 {
     int size = 4;
     std::vector<double> x(size, 0);
-    std::vector<double> b_estimate(size, 0);
+    std::vector<double> output_b(size, 0);
 
     std::shared_ptr<double[]> init_dense_values(new double[size * size]{10., 2., 3., 5., 1., 14., 6., 2., -1., 4., 16., -4, 5., 4., 3., 11.});
 
@@ -267,7 +267,7 @@ bool test_lu_dense()
     std::cout << "Time taken for LU: " << duration << " s " << std::endl
               << std::endl;
 
-    if (dense_solver.residualCalc(x, b_estimate) > 1e-6)
+    if (dense_solver.residualCalc(x, output_b) > 1e-6)
     {
         TestRunner::testError("LU residual is above 1e-6");
         return false;
@@ -280,7 +280,7 @@ bool test_lu_dense_random()
 {
     int size = 100;
     std::vector<double> x(size, 0);
-    std::vector<double> b_estimate(size, 0);
+    std::vector<double> output_b(size, 0);
 
     auto solver = Solver<double>(size);
 
@@ -295,7 +295,7 @@ bool test_lu_dense_random()
     std::cout << "Time taken for LU: " << duration << " s " << std::endl
               << std::endl;
 
-    if (solver.residualCalc(x, b_estimate) > 1e-6)
+    if (solver.residualCalc(x, output_b) > 1e-6)
     {
         TestRunner::testError("LU residual is above 1e-6");
         return false;

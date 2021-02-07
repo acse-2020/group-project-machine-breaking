@@ -17,7 +17,6 @@ Matrix<T>::Matrix(int rows, int cols, bool preallocate) : rows(rows), cols(cols)
 
 // Constructor - now just setting the value of our pointer
 template <class T>
-//Matrix<T>::Matrix(int rows, int cols, T *values_ptr) : rows(rows), cols(cols), size_of_values(rows * cols), values(values_ptr)
 Matrix<T>::Matrix(int rows, int cols, std::shared_ptr<T[]> values_ptr) : rows(rows), cols(cols), size_of_values(rows * cols), values(values_ptr)
 {
 }

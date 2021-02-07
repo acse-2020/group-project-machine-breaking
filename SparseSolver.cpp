@@ -25,26 +25,25 @@ SparseSolver<T>::~SparseSolver()
 }
 
 template <class T>
-T SparseSolver<T>::residualCalc(std::vector<T> &x, std::vector<T> &b_estimate)
+T SparseSolver<T>::residualCalc(std::vector<T> &x, std::vector<T> &output_b)
 {
     T residual = 0;
     // A x = b(estimate)
-    A.matVecMult(x, b_estimate);
+    A.matVecMult(x, output_b);
 
     // Find the norm between old value and new guess
     for (int i = 0; i < A.rows; i++)
     {
-        residual += pow(b_estimate[i] - b[i], 2.0);
+        residual += pow(output_b[i] - b[i], 2.0);
     }
     return sqrt(residual);
 }
 
-// NOTE: this is currently only implemented for isGaussSeidel = false
 template <class T>
 void SparseSolver<T>::stationaryIterative(std::vector<T> &x, double &tol, int &it_max, bool isGaussSeidel)
 {
     double residual;
-    std::vector<T> b_estimate(x.size(), 0);
+    std::vector<T> output_b(x.size(), 0);
 
     // vector for storing previous iteration if necessary
     std::vector<T> x_old;
@@ -96,7 +95,7 @@ void SparseSolver<T>::stationaryIterative(std::vector<T> &x, double &tol, int &i
         }
 
         // Call residual calculation method
-        residual = residualCalc(x, b_estimate);
+        residual = residualCalc(x, output_b);
 
         if (residual < tol)
         {
@@ -119,12 +118,10 @@ void SparseSolver<T>::stationaryIterative(std::vector<T> &x, double &tol, int &i
 template <class T>
 void SparseSolver<T>::conjugateGradient(std::vector<T> &x, double &tol, int &it_max)
 {
-    // TODO: check diagonal dominance
-    // TODO: add more comments
     double residual;
     double alpha;
     double beta;
-    std::vector<T> b_estimate(x.size(), 0);
+    std::vector<T> output_b(x.size(), 0);
     std::vector<T> residue_vec(x.size(), 0);
     std::vector<T> p(x.size(), 0);
     std::vector<T> Ap_product(x.size(), 0);
@@ -139,9 +136,6 @@ void SparseSolver<T>::conjugateGradient(std::vector<T> &x, double &tol, int &it_
     {
         x[i] = 0;
     }
-
-    // Calculate estimate of b
-    // A.matVecMult(x, b_estimate);
 
     // Find the norm between old value and new guess
     for (int i = 0; i < x.size(); i++)
@@ -561,12 +555,7 @@ std::shared_ptr<CSRMatrix<T>> SparseSolver<T>::cholesky_decomp()
                                     A_ij = A.values[k];
                                 }
                             }
-                            // std::cout << "A_ij " << A_ij << std::endl;
-                            // std::cout << "sum_ij " << sum_ij << std::endl;
 
-                            // std::cout << "R_ij " << R_values[diag] << std::endl;
-
-                            // Lij = (Lij - sum(Lik[:j]*Rjk[:j])/Ljj; for i>j
                             R_values.push_back((A_ij - sum_ij) / R_values[diag]);
                         }
                     }
@@ -626,9 +615,6 @@ void SparseSolver<T>::cholesky_solve(CSRMatrix<T> &R, std::vector<T> &x)
     checkDimensions(A, x);
 
     std::shared_ptr<CSRMatrix<T>> R_T = R.transpose();
-
-    // R_T->printMatrix();
-    // R_T->print2DMatrix();
 
     // The unknown x will be used as temporary storage for y.
     // The equations for forward and backward substitution have
