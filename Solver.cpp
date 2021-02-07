@@ -78,7 +78,7 @@ T Solver<T>::residualCalc(std::vector<T> &x, std::vector<T> &output_b)
 
 // Jacobi and Gauss-Seidel iterative solvers
 template <class T>
-void Solver<T>::stationaryIterative(std::vector<T> &x, double &tol, int &it_max, bool isGaussSeidel, bool print = false)
+void Solver<T>::stationaryIterative(std::vector<T> &x, double &tol, int &it_max, bool isGaussSeidel, bool print)
 {
     T residual;
     T sum;
