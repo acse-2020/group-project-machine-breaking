@@ -279,16 +279,16 @@ std::shared_ptr<CSRMatrix<T>> SparseSolver<T>::cholesky_decomp()
                 if (ci != 0 && ci != i)
                 {
 
-                    int r_start_above = R_row_position[i - 1];
-                    int r_end_above = R_row_position[i];
+                    int r_start_above = R_row_position[ci];
+                    int r_end_above = R_row_position[ci + 1];
 
                     for (int n = R_r_start; n < R_r_end; n++)
                     {
-                        // Loop through columns[:j] in row above current entry[i, ci]
+                        // Loop through columns[:j] in row ci above current entry row[i, ci]
                         for (int a = r_start_above; a < r_end_above; a++)
                         {
                             // Match cols in current and above rows
-                            if (R_cols[n] == R_cols[a])
+                            if (R_cols[n] == R_cols[a] && R_cols[n] != ci)
                             {
                                 sum_ij += R_values[n] * R_values[a];
                             }
@@ -312,6 +312,10 @@ std::shared_ptr<CSRMatrix<T>> SparseSolver<T>::cholesky_decomp()
                                     A_ij = A.values[k];
                                 }
                             }
+                            // std::cout << "A_ij " << A_ij << std::endl;
+                            // std::cout << "sum_ij " << sum_ij << std::endl;
+
+                            // std::cout << "R_ij " << R_values[diag] << std::endl;
 
                             // Lij = (Lij - sum(Lik[:j]*Rjk[:j])/Ljj; for i>j
                             R_values.push_back((A_ij - sum_ij) / R_values[diag]);
