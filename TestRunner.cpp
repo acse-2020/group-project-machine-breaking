@@ -17,13 +17,16 @@ TestRunner::~TestRunner()
     this->completeRun();
 }
 
-void TestRunner::test(bool (*fun_ptr)(), std::string title)
+void TestRunner::test(bool (*test_ptr)(), std::string title)
 {
     int total = this->testsFailed + this->testsSucceeded;
+
+    // title displayed before any terminal outputs
     std::cout << std::endl
               << BLUE << "Test " << total + 1 << ": " << title << RESET << std::endl;
 
-    bool outcome = fun_ptr();
+    bool outcome = test_ptr();
+
     if (outcome)
     {
         this->testsSucceeded += 1;
@@ -53,6 +56,7 @@ void TestRunner::completeRun()
 
 bool TestRunner::assertArrays(double *arr1, double *arr2, int length)
 {
+    // helper function to check whether all values in arrays are the same
     for (int i = 0; i < length; i++)
     {
         if (arr1[i] != arr2[i])
@@ -71,6 +75,7 @@ void TestRunner::testError(std::string message)
 
 bool TestRunner::assertArrays(int *arr1, int *arr2, int length)
 {
+    // ideally this would be a template function to avoid duplication
     for (int i = 0; i < length; i++)
     {
         if (arr1[i] != arr2[i])
