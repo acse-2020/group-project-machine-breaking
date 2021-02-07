@@ -182,18 +182,11 @@ bool test_dense_jacobi_and_gauss_seidl()
 
     std::vector<double> output_b(size, 0);
 
-    bool j_res, gs_res;
-    if (j_res = dense_solver.residualCalc(x_j, output_b) > tol)
-    {
-        TestRunner::testError("Jacobi residual is above tolerance");
-    }
-    if (gs_res = dense_solver.residualCalc(x_gs, output_b) > tol)
-    {
-        TestRunner::testError("Gauss-Seidl residual is above tolerance");
-    }
+    bool j_res = dense_solver.residualCalc(x_j, output_b);
+    bool gs_res = dense_solver.residualCalc(x_gs, output_b);
 
     // passes if residual for both is small enough
-    return !j_res && !gs_res;
+    return TestRunner::assertBelowTolerance(j_res, tol) && TestRunner::assertBelowTolerance(gs_res, tol);
 }
 
 // Sparse Jacobi and Gauss-Seidel
@@ -244,13 +237,9 @@ bool test_sparse_stationary_iterative()
 
     printVector(x);
 
-    if (sparse_solver.residualCalc(x, output_b) > 1e-6)
-    {
-        TestRunner::testError("Sparse Gauss Seidel residual is above 1e-6");
-        return false;
-    }
+    double residual = sparse_solver.residualCalc(x, output_b);
 
-    return true;
+    return TestRunner::assertBelowTolerance(residual, 1e-6);
 }
 
 bool test_sparse_CG()
@@ -280,13 +269,9 @@ bool test_sparse_CG()
 
     std::vector<double> output_b(size, 0);
 
-    if (sparse_solver.residualCalc(x, output_b) > 1e-6)
-    {
-        TestRunner::testError("Sparse CG residual is above 1e-6");
-        return false;
-    }
+    double residual = sparse_solver.residualCalc(x, output_b);
 
-    return true;
+    return TestRunner::assertBelowTolerance(residual, 1e-6);
 }
 
 bool test_lu_dense()
@@ -313,13 +298,9 @@ bool test_lu_dense()
     std::cout << "Time taken for LU: " << duration << " s " << std::endl
               << std::endl;
 
-    if (dense_solver.residualCalc(x, output_b) > 1e-6)
-    {
-        TestRunner::testError("LU residual is above 1e-6");
-        return false;
-    }
+    double residual = dense_solver.residualCalc(x, output_b);
 
-    return true;
+    return TestRunner::assertBelowTolerance(residual, 1e-6);
 }
 
 bool test_jacobi_dense_random()
@@ -344,12 +325,9 @@ bool test_jacobi_dense_random()
     std::cout << "Time taken for Jacobi: " << duration << " s " << std::endl
               << std::endl;
 
-    if (solver.residualCalc(x, output_b) > 1e-6)
-    {
-        TestRunner::testError("Jacobi residual is above 1e-6");
-        return false;
-    }
-    return true;
+    double residual = solver.residualCalc(x, output_b);
+
+    return TestRunner::assertBelowTolerance(residual, 1e-6);
 }
 
 bool test_gauss_seidel_dense_random()
@@ -374,12 +352,9 @@ bool test_gauss_seidel_dense_random()
     std::cout << "Time taken for Gauss-Seidel: " << duration << " s " << std::endl
               << std::endl;
 
-    if (solver.residualCalc(x, output_b) > 1e-6)
-    {
-        TestRunner::testError("Gauss-Seidel residual is above 1e-6");
-        return false;
-    }
-    return true;
+    double residual = solver.residualCalc(x, output_b);
+
+    return TestRunner::assertBelowTolerance(residual, 1e-6);
 }
 
 bool test_lu_dense_random()
@@ -401,12 +376,8 @@ bool test_lu_dense_random()
     std::cout << "Time taken for LU: " << duration << " s " << std::endl
               << std::endl;
 
-    if (solver.residualCalc(x, output_b) > 1e-6)
-    {
-        TestRunner::testError("LU residual is above 1e-6");
-        return false;
-    }
-    return true;
+    double residual = solver.residualCalc(x, output_b);
+    return TestRunner::assertBelowTolerance(residual, 1e-6);
 }
 
 bool test_cholesky()
