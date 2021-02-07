@@ -516,20 +516,34 @@ bool test_sparse_lu()
 
 void run_tests()
 {
-    TestRunner test_runner = TestRunner();
-    test_runner.test(&test_mat_vec_mult, "matrix vector multiplication.");
-    test_runner.test(&test_residual_calculation, "calcResidual method.");
-    test_runner.test(&test_check_dimensions_matching, "checkDimensions for matching matrices.");
-    test_runner.test(&test_check_dimensions_not_matching, "checkDimensions for non-matching matrices.");
-    test_runner.test(&test_sparse_matmatmult_4x4, "sparse matMatMult for two sparse 4x4 matrices.");
-    test_runner.test(&test_sparse_matmatmult_5x5, "sparse matMatMult for multiplying a 5x5 sparse matrix by itself.");
-    test_runner.test(&test_dense_jacobi_and_gauss_seidl, "stationaryIterative: dense Jacobi and Gauss-Seidel solver for 4x4 matrix.");
-    test_runner.test(&test_jacobi_dense_random, "dense Jacobi with a random 100x100 matrix");
-    test_runner.test(&test_gauss_seidel_dense_random, "dense Gauss Seidel with a random 100x100 matrix");
-    test_runner.test(&test_lu_dense, "dense LU solver for 4x4 matrix.");
-    test_runner.test(&test_sparse_stationary_iterative, "sparse Jacobi solver for 4x4 matrix.");
-    test_runner.test(&test_sparse_CG, "sparse conjugate gradient solver for 4x4 matrix.");
-    test_runner.test(&test_lu_dense_random, "dense LU with random matrices.");
-    test_runner.test(&test_sparse_lu, "sparse LU decomposition.");
-    test_runner.test(&test_cholesky, "Cholesky method.");
+
+    // MATRIX
+    TestRunner test_runner_matrix = TestRunner("Matrix");
+    test_runner_matrix.test(&test_mat_vec_mult, "matrix vector multiplication.");
+
+    // CSRMATRIX
+    TestRunner test_runner_csrmatrix = TestRunner("CSRMatrix");
+    test_runner_csrmatrix.test(&test_sparse_matmatmult_4x4, "sparse matMatMult for two sparse 4x4 matrices.");
+    test_runner_csrmatrix.test(&test_sparse_matmatmult_5x5, "sparse matMatMult for multiplying a 5x5 sparse matrix by itself.");
+
+    // SOLVER
+    TestRunner test_runner_solver = TestRunner("Solver");
+    test_runner_solver.test(&test_residual_calculation, "calcResidual method.");
+    test_runner_solver.test(&test_dense_jacobi_and_gauss_seidl, "stationaryIterative: dense Jacobi and Gauss-Seidel solver for 4x4 matrix.");
+    test_runner_solver.test(&test_jacobi_dense_random, "dense Jacobi with a random 100x100 matrix");
+    test_runner_solver.test(&test_gauss_seidel_dense_random, "dense Gauss Seidel with a random 100x100 matrix");
+    test_runner_solver.test(&test_lu_dense, "dense LU solver for 4x4 matrix.");
+    test_runner_solver.test(&test_lu_dense_random, "dense LU with random matrices.");
+
+    // SPARSE SOLVER
+    TestRunner test_runner_ss = TestRunner("SparseSolver");
+    test_runner_ss.test(&test_sparse_stationary_iterative, "sparse Jacobi solver for 4x4 matrix.");
+    test_runner_ss.test(&test_sparse_CG, "sparse conjugate gradient solver for 4x4 matrix.");
+    test_runner_ss.test(&test_sparse_lu, "sparse LU decomposition.");
+    test_runner_ss.test(&test_cholesky, "Cholesky method.");
+
+    // UTILITIES
+    TestRunner test_runner_utils = TestRunner("Utilities");
+    test_runner_utils.test(&test_check_dimensions_matching, "checkDimensions for matching matrices.");
+    test_runner_utils.test(&test_check_dimensions_not_matching, "checkDimensions for non-matching matrices.");
 }

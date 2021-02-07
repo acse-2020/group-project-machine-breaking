@@ -8,7 +8,7 @@
 #define RESET "\033[0m"
 #define BLUE "\033[34m"
 
-TestRunner::TestRunner()
+TestRunner::TestRunner(std::string new_title): title(new_title)
 {
 }
 
@@ -45,11 +45,11 @@ void TestRunner::completeRun()
     std::cout << std::endl;
     if (this->testsFailed == 0)
     {
-        std::cout << GREEN << total << "/" << total << " tests passed." << RESET << std::endl;
+        std::cout << GREEN << this->title << ": " << total << "/" << total << " tests passed." << RESET << std::endl;
     }
     else
     {
-        std::cout << RED << " " << this->testsFailed << "/" << total << " tests failed." << RESET << std::endl
+        std::cout << RED<< this->title << ": "  << " " << this->testsFailed << "/" << total << " tests failed." << RESET << std::endl
                   << std::endl;
     }
 }
