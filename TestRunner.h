@@ -20,6 +20,8 @@ public:
     // runs the function pointed at by test_ptr
     void test(bool (*test_ptr)(), std::string title);
 
+    static bool assertBelowTolerance(double val, double tol);
+
     // static helper methods that can be used in a test function
     static bool assertArrays(int *arr1, int *arr2, int length);
     static bool assertArrays(double *arr1, double *arr2, int length);

@@ -1,6 +1,7 @@
 #include "TestRunner.h"
 #include <iostream>
 #include <string>
+#include <math.h>
 
 // Colourful text output (1)
 #define RED "\033[31m"
@@ -8,7 +9,7 @@
 #define RESET "\033[0m"
 #define BLUE "\033[34m"
 
-TestRunner::TestRunner(std::string new_title): title(new_title)
+TestRunner::TestRunner(std::string new_title) : title(new_title)
 {
 }
 
@@ -49,7 +50,8 @@ void TestRunner::completeRun()
     }
     else
     {
-        std::cout << RED<< this->title << ": "  << " " << this->testsFailed << "/" << total << " tests failed." << RESET << std::endl
+        std::cout << RED << this->title << ": "
+                  << " " << this->testsFailed << "/" << total << " tests failed." << RESET << std::endl
                   << std::endl;
     }
 }
@@ -83,6 +85,23 @@ bool TestRunner::assertArrays(int *arr1, int *arr2, int length)
             std::cerr << RED << "Values do not match: " << arr1[i] << " != " << arr2[i] << RESET << std::endl;
             return false;
         }
+    }
+    return true;
+}
+
+bool TestRunner::assertBelowTolerance(double val, double tol)
+{
+
+    if (isnan(val))
+    {
+        TestRunner::testError("Something went wrong");
+        return false;
+    }
+
+    if (val > tol)
+    {
+        TestRunner::testError("Value is above tolerance");
+        return false;
     }
     return true;
 }
