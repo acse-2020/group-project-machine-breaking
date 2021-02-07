@@ -6,9 +6,11 @@
 int main()
 {
     std::string answer;
-    std::cout << "Options: " << std::endl
-              << "<test> " << std::endl
-              << "<performance>"
+    std::cout << std::endl
+              << "Options: " << std::endl
+              << "--------" << std::endl
+              << "- test [t]" << std::endl
+              << "- performance [p]"
               << std::endl
               << std::endl
               << "Input the option and hit enter." << std::endl;
