@@ -14,3 +14,7 @@ To add a unit test, create a function with a bool return and no arguments in `te
 
 [1] Colourful text output:
 <https://stackoverflow.com/questions/9158150/colored-output-in-c>
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
